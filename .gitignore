@@ -1,0 +1,44 @@
+# R
+.Rhistory
+.RData
+.Rproj.user
+*.Rproj
+r-service/TOM/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.env
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Data — never commit Seurat objects, raw counts, or results
+*.h5Seurat
+*.h5Seurat.old
+*.h5ad
+*.loom
+*.rds
+*.tar
+*.mtx
+*.mtx.gz
+local_data/
+
+# GSE243639 (~11 GB: 29 samples of raw 10x counts + built Seurat objects).
+# Download from GEO; rebuild with DATA_UNZIPPED/build_seurat_GSE243639.R.
+# The build scripts themselves ARE tracked — everything else in here is not.
+DATA_UNZIPPED/*
+!DATA_UNZIPPED/*.R
+GSE243639_Clinical_data.csv
+hdwgcna_out/
+
+# OS
+.DS_Store
+Thumbs.db

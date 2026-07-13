@@ -1,0 +1,34 @@
+services:
+  r-service:
+    build: ./r-service
+    ports:
+      - "8100:8100"
+    volumes:
+      - shared_data:/shared
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "8200:8200"
+    volumes:
+      - shared_data:/shared
+    environment:
+      R_SERVICE_URL: http://r-service:8100
+      PORT: "8200"
+    depends_on:
+      - r-service
+    restart: unless-stopped
+
+  # Frontend profile — excluded from default `docker compose up`
+  # Enable with: docker compose --profile frontend up
+  # nginx inside the container listens on 80; exposed as 4000 on the host
+  react-ui:
+    build: ./frontend
+    ports:
+      - "4000:80"
+    profiles:
+      - frontend
+
+volumes:
+  shared_data:
