@@ -9,17 +9,38 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Known issues
-- `/analyze` and `/test-soft-powers` can hit `vector memory limit of 32.0 Gb` on a 32 GB
-  machine with the full 107k-cell object. Not yet fixed. Likely contributors, in order:
-  `entrypoint.R` runs `plan(multisession, workers = 2)`, so two worker processes each hold a
-  copy of the object; and the saved object still carries a `scale.data` layer
-  (2,000 × 107,113 doubles ≈ 1.7 GB) that hdWGCNA does not read. Candidate fixes: drop
-  `scale.data` before `saveRDS`, subset to the analysed cell type, drop to one worker, or
-  raise `mem.maxVSize()`.
 - `build_seurat_GSE243639.R` labels a mixed neuronal cluster as `Dopaminergic Neurons`
   (it wins the TH/SLC6A3 panel with a weak score of ~0.33 while only ~40 % of its nuclei
   express either marker). `relabel_cluster7.R` corrects this after the fact and **must be
   re-run after any rebuild**. A purity guard in the labelling step would fix it properly.
+- Only **11 of 29 donors** (4 PD, 7 control) clear `MetacellsByGroups(min_cells = 100)` for
+  dopaminergic neurons — PD brains have lost the very cells being counted. Fine for a pooled
+  network, but a PD-vs-control comparison built on 4 PD donors is underpowered. A property of
+  the data, not a bug.
+
+---
+
+## [0.3.0] - 2026-07-13
+
+### Added
+- `DATA_UNZIPPED/make_da_object.R` — writes `seurat_GSE243639_SNc_DA.rds`, a dopaminergic-only
+  analysis object. Subsets to the 8,216 DA nuclei and drops the `scale.data` layer, taking the
+  object from **7.75 GB to 0.33 GB in RAM** (23×) and 0.06 GB on disk. Retains the `pca`
+  reduction (`MetacellsByGroups` hardcodes `reduction = "pca"`) and the 2,000 variable features
+  (`SelectNetworkGenes` defaults to `gene_select = "variable"`). No hdWGCNA result changes.
+- `.claude/skills/release/SKILL.md` — `/release` skill: bumps the version, writes the CHANGELOG
+  entry, commits, tags, and pushes, with a hard guard against committing the ~11 GB dataset.
+
+### Fixed
+- **`vector memory limit of 32.0 Gb` when running the pipeline.** The r-service runs
+  `plan(multisession, workers = 2)`, so two worker processes each held a copy of the full
+  107,113-cell object (7.75 GB each, plus a 1.7 GB `scale.data` layer hdWGCNA never reads) to
+  build a network on 7.7 % of its cells. Use `seurat_GSE243639_SNc_DA.rds` as the pipeline
+  input instead — peak usage drops to ~0.66 GB across both workers. Not a hardware limit.
+
+### Notes
+- Gene count was *not* a contributor: `SetupForWGCNA` forwards `...` to `SelectNetworkGenes`,
+  whose `gene_select = "variable"` default selects the 2,000 HVGs, so the TOM is ~32 MB.
 
 ---
 
