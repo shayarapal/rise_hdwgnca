@@ -11,7 +11,7 @@ const DEFAULT_PARAMS = {
   h5seurat_path: '',
   out_dir:        '',
   cell_type_col:  'cell_type',
-  group_by:       ['cell_type', 'Sample'],
+  group_by:       ['cell_type', 'sample_id'],
   group_name:     '',
   wgcna_name:     'tutorial',
   k:              25,

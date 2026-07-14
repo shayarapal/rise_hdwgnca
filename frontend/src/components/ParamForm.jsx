@@ -87,7 +87,7 @@ export default function ParamForm({ params, onChange }) {
             id="group_by_1"
             value={params.group_by[1] ?? ''}
             onChange={setGroupBy(1)}
-            placeholder="Sample"
+            placeholder="sample_id"
           />
         </div>
       </div>

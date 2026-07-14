@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Known issues
+- `MetacellsByGroups` still uses `reduction = "pca"` and `max_shared = 15`, where the hdWGCNA
+  tutorial uses `reduction = 'harmony'` and `max_shared = 10`. **Deliberate, not an oversight.**
+  Metacells never span donors (`group_by` includes `sample_id`), so the uncorrected reduction has
+  limited effect. Revisit if metacells are ever built across batches.
 - `build_seurat_GSE243639.R` labels a mixed neuronal cluster as `Dopaminergic Neurons`
   (it wins the TH/SLC6A3 panel with a weak score of ~0.33 while only ~40 % of its nuclei
   express either marker). `relabel_cluster7.R` corrects this after the fact and **must be
@@ -17,6 +21,45 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   dopaminergic neurons — PD brains have lost the very cells being counted. Fine for a pooled
   network, but a PD-vs-control comparison built on 4 PD donors is underpowered. A property of
   the data, not a bug.
+
+---
+
+## [0.4.0] - 2026-07-13
+
+> **Network results change.** The co-expression network now spans 7,465 genes instead of 2,000.
+> Any modules produced before this release were built on a different gene universe and should be
+> regenerated.
+
+### Fixed
+- **`SetupForWGCNA` was not selecting genes the way the hdWGCNA tutorial does.** `plumber.R`
+  omitted `gene_select` and `fraction`, so `SelectNetworkGenes` fell back to its
+  `gene_select = "variable"` default — the 2,000 `FindVariableFeatures` genes, computed across
+  *all 107,113 cells of every cell type*, i.e. genes that separate oligodendrocytes from
+  astrocytes. The tutorial passes `gene_select = "fraction", fraction = 0.05` (genes expressed in
+  ≥ 5 % of cells in the analysed group), which for the dopaminergic neurons is **7,465 genes**.
+  hdWGCNA can only find a gene's partners among genes in the network, so the old setting asked
+  "what co-expresses with CACNA1D?" while excluding ~5,500 genes dopaminergic neurons express.
+  CACNA1D itself (8.0 % of DA nuclei) was present under both settings, so no prior result was
+  *invalid* — just narrow. **6,826 genes are newly searchable as CACNA1D partners.**
+- **`/analyze` built the network on different metacells than the soft power was chosen from.**
+  `MetacellsByGroups` is kNN-based and takes no `seed` argument, and none was set; `/analyze`
+  reloads the source object and recomputes from scratch. The soft power picked from the
+  `/test-soft-powers` curve was therefore applied to a *different* metacell set, silently.
+  `set.seed(42)` now precedes both `MetacellsByGroups` calls — verified to reproduce identical
+  metacell barcodes (5,482 metacells) across runs.
+- **TOM files escaped the job's output directory.** `ConstructNetwork` defaults to
+  `tom_outdir = "TOM"` — a *relative* path — so the topological overlap matrix was written to the
+  r-service working directory, not `out_dir`. With `tom_name = NULL`, `overwrite_tom = FALSE`, and
+  `plan(multisession, workers = 2)`, a rerun could trip on a stale TOM and concurrent jobs could
+  collide. Now passes `tom_outdir = p$out_dir` and `tom_name = p$wgcna_name`.
+- `frontend/src/App.jsx` defaulted `group_by` to `['cell_type', 'Sample']`; `Sample` is not a
+  column in this dataset. Now `['cell_type', 'sample_id']`, with the `ParamForm` placeholder to
+  match.
+
+### Removed
+- `plumber.R` wrote `seurat_after_soft_powers.rds` with the comment *"Persist object so /analyze
+  can reload it if needed"* — `/analyze` never read it. Dead code; with the metacell seed in place
+  it is not needed.
 
 ---
 

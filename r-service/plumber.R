@@ -62,8 +62,20 @@ run_setup_through_soft_powers <- function(p) {
 
   obj <- load_seurat(p$h5seurat_path)   # .rds or .h5Seurat
 
-  obj <- SetupForWGCNA(obj, wgcna_name = p$wgcna_name)
+  # gene_select/fraction per the hdWGCNA tutorial. Without them SelectNetworkGenes falls back
+  # to gene_select = "variable", i.e. VariableFeatures() — genes chosen for variance ACROSS all
+  # cell types, not genes expressed within the one being analysed.
+  obj <- SetupForWGCNA(
+    obj,
+    gene_select = "fraction",
+    fraction    = 0.05,
+    wgcna_name  = p$wgcna_name
+  )
 
+  # MetacellsByGroups is kNN-based and takes no seed argument. Seed it here so /analyze rebuilds
+  # the same metacells whose soft-power curve was inspected in /test-soft-powers — otherwise the
+  # chosen soft power is applied to a different metacell set.
+  set.seed(42)
   obj <- MetacellsByGroups(
     seurat_obj  = obj,
     group.by    = p$group_by,
@@ -92,9 +104,6 @@ run_setup_through_soft_powers <- function(p) {
 
   sp_plot <- wrap_plots(PlotSoftPowers(obj), ncol = 2)
   save_png(sp_plot, file.path(p$out_dir, "soft_power_plot.png"))
-
-  # Persist object so /analyze can reload it if needed
-  saveRDS(obj, file.path(p$out_dir, "seurat_after_soft_powers.rds"))
 }
 
 run_full_pipeline <- function(p) {
@@ -108,8 +117,20 @@ run_full_pipeline <- function(p) {
 
   obj <- load_seurat(p$h5seurat_path)   # .rds or .h5Seurat
 
-  obj <- SetupForWGCNA(obj, wgcna_name = p$wgcna_name)
+  # gene_select/fraction per the hdWGCNA tutorial. Without them SelectNetworkGenes falls back
+  # to gene_select = "variable", i.e. VariableFeatures() — genes chosen for variance ACROSS all
+  # cell types, not genes expressed within the one being analysed.
+  obj <- SetupForWGCNA(
+    obj,
+    gene_select = "fraction",
+    fraction    = 0.05,
+    wgcna_name  = p$wgcna_name
+  )
 
+  # MetacellsByGroups is kNN-based and takes no seed argument. Seed it here so /analyze rebuilds
+  # the same metacells whose soft-power curve was inspected in /test-soft-powers — otherwise the
+  # chosen soft power is applied to a different metacell set.
+  set.seed(42)
   obj <- MetacellsByGroups(
     seurat_obj  = obj,
     group.by    = p$group_by,
@@ -139,10 +160,15 @@ run_full_pipeline <- function(p) {
   sp_plot <- wrap_plots(PlotSoftPowers(obj), ncol = 2)
   save_png(sp_plot, file.path(p$out_dir, "soft_power_plot.png"))
 
+  # tom_outdir defaults to the relative path "TOM", which lands in the r-service working
+  # directory rather than the job's out_dir — so concurrent jobs (workers = 2) sharing a
+  # wgcna_name collide, and overwrite_tom = FALSE can trip over a stale TOM on a rerun.
   obj <- ConstructNetwork(
     obj,
     soft_power  = p$soft_power,
     networkType = p$network_type,
+    tom_outdir  = p$out_dir,
+    tom_name    = p$wgcna_name,
     wgcna_name  = p$wgcna_name
   )
 
