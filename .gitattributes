@@ -1,0 +1,10 @@
+# Normalize to LF regardless of the checkout platform. Without this, a fresh clone on
+# Windows can silently pick up CRLF in .R files and Dockerfiles depending on core.autocrlf.
+* text=auto eol=lf
+
+# Binary — never let git attempt line-ending conversion on these.
+*.rds binary
+*.h5Seurat binary
+*.png binary
+*.pdf binary
+*.tar binary

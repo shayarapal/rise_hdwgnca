@@ -148,6 +148,17 @@ body { background: var(--clr-bg); }
   outline-offset: -1px;
   border-color: var(--clr-accent);
 }
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--clr-text);
+  text-transform: none;
+  cursor: pointer;
+}
+.checkbox-label input[type="checkbox"] { width: auto; margin: 0; }
+
 .form-group .hint {
   font-size: 11px;
   color: var(--clr-muted);
@@ -260,6 +271,18 @@ body { background: var(--clr-bg); }
 }
 .result-header-actions { display: flex; gap: 6px; }
 .result-block-body { padding: 16px; }
+.result-block-footer {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--clr-muted);
+  background: var(--clr-bg);
+  border-top: 1px solid var(--clr-border);
+}
+
+/* Zsummary preservation bands (Langfelder et al. 2011) */
+td.z-none   { color: var(--clr-danger);  font-weight: 700; }
+td.z-weak   { color: var(--clr-warn);    font-weight: 600; }
+td.z-strong { color: var(--clr-success); font-weight: 600; }
 
 .result-img {
   max-width: 100%;
@@ -326,6 +349,44 @@ table.module-table tr:hover td { background: var(--clr-bg); }
 .sort-indicator { font-size: 10px; margin-left: 4px; opacity: 0.6; }
 
 .error-text { color: var(--clr-danger); font-size: 12px; }
+
+/* ── Soft power / gene selection ──────────────────────────────── */
+.btn-secondary {
+  background: var(--clr-surface);
+  color: var(--clr-accent);
+  border: 1px solid var(--clr-accent);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--clr-bg); }
+
+.banner {
+  padding: 10px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-bottom: 1px solid var(--clr-border);
+}
+.banner-ok   { background: #dcfce7; color: #14532d; }
+.banner-note { background: #eff6ff; color: #1e3a5f; }
+.banner-warn { background: #fef3c7; color: #78350f; }
+
+/* Rows clearing the scale-free fit threshold; the recommended one is the pick. */
+tr.sft-pass td { background: #f0fdf4; }
+tr.sft-rec  td { background: #dcfce7; font-weight: 600; }
+tr.sft-fail td { background: #fef2f2; color: var(--clr-muted); }
+
+.sft-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--clr-success);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gs-note { color: var(--clr-muted); font-size: 11px; max-width: 280px; }
 
 /* ── Small buttons (exports, browser actions) ─────────────────── */
 .btn-sm {

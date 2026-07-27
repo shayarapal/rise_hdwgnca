@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import FileBrowser from './FileBrowser.jsx'
 
-export default function ParamForm({ params, onChange }) {
+export default function ParamForm({ params, onChange, onRunGeneSelection, geneSelectionRunning }) {
   const set = (field) => (e) => onChange({ ...params, [field]: e.target.value })
   const setNum = (field) => (e) => onChange({ ...params, [field]: Number(e.target.value) })
   const setGroupBy = (idx) => (e) => {
@@ -12,6 +12,29 @@ export default function ParamForm({ params, onChange }) {
 
   // Which field the file browser is currently picking for: null | 'h5seurat_path' | 'out_dir'
   const [browsing, setBrowsing] = useState(null)
+
+  // "custom" is a legal SelectNetworkGenes value but the API rejects it (no gene_list param),
+  // so it is not offered here.
+  const geneSelect = params.gene_select ?? 'fraction'
+
+  // The sweep loads the object and reads its metadata, so it needs the same fields the
+  // pipeline does — minus anything about the network itself.
+  const canSweep = Boolean(
+    params.h5seurat_path?.trim() &&
+    params.out_dir?.trim() &&
+    params.cell_type_col?.trim() &&
+    !geneSelectionRunning,
+  )
+
+  // Condition-comparison mode is derived from the params themselves rather than held
+  // as separate state, so clearing it also clears the fields the backend keys off.
+  const compare = params.condition_col != null
+  const toggleCompare = (e) =>
+    onChange(
+      e.target.checked
+        ? { ...params, condition_col: 'condition', ref_group: '', query_group: '' }
+        : { ...params, condition_col: null, ref_group: null, query_group: null },
+    )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -102,6 +125,114 @@ export default function ParamForm({ params, onChange }) {
         />
         <span className="hint">Cell type to build the co-expression network for</span>
       </div>
+
+      <p className="form-section-title">Compare conditions</p>
+
+      <div className="form-group">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={compare}
+            onChange={toggleCompare}
+          />
+          Compare two conditions (module preservation)
+        </label>
+        <span className="hint">
+          Builds the network in the reference condition, projects it into the query
+          condition, and scores whether each module survives
+        </span>
+      </div>
+
+      {compare && (
+        <>
+          <div className="form-group">
+            <label htmlFor="condition_col">Condition column</label>
+            <input
+              id="condition_col"
+              value={params.condition_col ?? ''}
+              onChange={set('condition_col')}
+              placeholder="condition"
+            />
+            <span className="hint">Metadata column holding the two groups</span>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="ref_group">Reference</label>
+              <input
+                id="ref_group"
+                value={params.ref_group ?? ''}
+                onChange={set('ref_group')}
+                placeholder="control"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="query_group">Query</label>
+              <input
+                id="query_group"
+                value={params.query_group ?? ''}
+                onChange={set('query_group')}
+                placeholder="PD"
+              />
+            </div>
+          </div>
+          <span className="hint">
+            The network is built in the reference and tested in the query
+          </span>
+        </>
+      )}
+
+      <p className="form-section-title">Gene selection</p>
+
+      <div className="form-group">
+        <label htmlFor="gene_select">Gene select</label>
+        {/* Read with ?? so an untouched form omits the key entirely and the r-service applies
+            its own default — the request body stays identical to what it sends today. */}
+        <select id="gene_select" value={geneSelect} onChange={set('gene_select')}>
+          <option value="fraction">fraction</option>
+          <option value="variable">variable</option>
+          <option value="all">all</option>
+        </select>
+        <span className="hint">
+          {geneSelect === 'fraction'
+            ? 'Genes detected in at least the given share of cells'
+            : geneSelect === 'variable'
+              ? 'VariableFeatures() — variance across ALL cell types, not within this one'
+              : 'Every gene in the assay'}
+        </span>
+      </div>
+
+      {geneSelect === 'fraction' && (
+        <div className="form-group">
+          <label htmlFor="fraction">Fraction</label>
+          <input
+            id="fraction"
+            type="number"
+            step={0.01}
+            min={0.01}
+            max={1}
+            value={params.fraction ?? 0.05}
+            onChange={setNum('fraction')}
+          />
+          <span className="hint">
+            Keeps genes expressed in at least this share of cells — not the top X% of genes.
+            Tutorial default is 0.05.
+          </span>
+        </div>
+      )}
+
+      <button
+        type="button"
+        className="btn btn-secondary"
+        onClick={onRunGeneSelection}
+        disabled={!canSweep}
+      >
+        {geneSelectionRunning ? 'Sweeping…' : 'Run gene-selection sweep'}
+      </button>
+      <span className="hint">
+        Counts how many genes each candidate fraction keeps, so you can pick one from data
+        rather than by feel. hdWGCNA ships no tuner for this.
+      </span>
 
       <p className="form-section-title">Network parameters</p>
 

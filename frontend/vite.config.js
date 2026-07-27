@@ -7,11 +7,13 @@ export default defineConfig({
     port: 4000,
     proxy: {
       // In dev, forward API calls to the backend without CORS issues
-      '/test-soft-powers': 'http://localhost:8200',
-      '/analyze':          'http://localhost:8200',
-      '/status':           'http://localhost:8200',
-      '/results':          'http://localhost:8200',
-      '/files':            'http://localhost:8200',
+      '/test-soft-powers':     'http://localhost:8200',
+      '/analyze':              'http://localhost:8200',
+      '/module-preservation':  'http://localhost:8200',
+      '/gene-selection':       'http://localhost:8200',
+      '/status':               'http://localhost:8200',
+      '/results':              'http://localhost:8200',
+      '/files':                'http://localhost:8200',
     },
   },
 })

@@ -5,7 +5,10 @@ import ParamForm       from './components/ParamForm.jsx'
 import JobStatus       from './components/JobStatus.jsx'
 import ResultsPanel    from './components/ResultsPanel.jsx'
 import FileBrowser     from './components/FileBrowser.jsx'
-import { runSoftPowers, runAnalyze, getStatus, getModules } from './api.js'
+import {
+  runSoftPowers, runAnalyze, runModulePreservation, runGeneSelection,
+  getStatus, getModules, getPreservation, getSoftPowers, getGeneSelection,
+} from './api.js'
 
 const DEFAULT_PARAMS = {
   h5seurat_path: '',
@@ -17,6 +20,10 @@ const DEFAULT_PARAMS = {
   k:              25,
   max_shared:     15,
   network_type:   'signed',
+  // Condition-comparison mode; null until the user enables it in ParamForm.
+  condition_col:  null,
+  ref_group:      null,
+  query_group:    null,
 }
 
 const IDLE_JOB = { id: null, status: 'idle', error: null }
@@ -36,7 +43,14 @@ export default function App() {
   const [analyzeJob,       setAnalyzeJob]       = useState(IDLE_JOB)
   const [softPowerValue,   setSoftPowerValue]   = useState('')
   const [modules,          setModules]          = useState(null)
+  const [preservation,     setPreservation]     = useState(null)
   const [browseFiles,      setBrowseFiles]      = useState(false)
+  const [softPowers,       setSoftPowers]       = useState(null)
+  const [geneSelJob,       setGeneSelJob]       = useState(IDLE_JOB)
+  const [geneSelection,    setGeneSelection]    = useState(null)
+
+  // Comparison mode drives which endpoint the second phase calls.
+  const compare = params.condition_col != null
 
   // ── Polling: soft power ────────────────────────────────────
   useEffect(() => {
@@ -45,12 +59,55 @@ export default function App() {
       try {
         const { status, error } = await getStatus(softPowerJob.id)
         setSoftPowerJob((j) => ({ ...j, status, error: error ?? null }))
+        if (status === 'done') {
+          const sp = await getSoftPowers(softPowerJob.id)
+          setSoftPowers(sp)
+          // Prefill with the power ConstructNetwork would itself pick. Functional update so a
+          // value the user already typed is never clobbered. Stays empty when nothing reaches
+          // the scale-free threshold — SoftPowerTable shows the warning instead.
+          if (sp.recommended_power != null) {
+            setSoftPowerValue((v) => (v === '' ? String(sp.recommended_power) : v))
+          }
+        }
       } catch (e) {
         setSoftPowerJob((j) => ({ ...j, status: 'failed', error: e.message }))
       }
     }, 5000)
     return () => clearInterval(iv)
   }, [softPowerJob.status, softPowerJob.id])
+
+  // ── Polling: gene-selection sweep ──────────────────────────
+  // Independent of the soft-power job: sweeping does not invalidate a run, choosing a
+  // different fraction does (see the invalidation effect below).
+  useEffect(() => {
+    if (geneSelJob.status !== 'running') return
+    const iv = setInterval(async () => {
+      try {
+        const { status, error } = await getStatus(geneSelJob.id)
+        setGeneSelJob((j) => ({ ...j, status, error: error ?? null }))
+        if (status === 'done') {
+          const rows = await getGeneSelection(geneSelJob.id)
+          setGeneSelection(Array.isArray(rows) ? rows : [])
+        }
+      } catch (e) {
+        setGeneSelJob((j) => ({ ...j, status: 'failed', error: e.message }))
+      }
+    }, 5000)
+    return () => clearInterval(iv)
+  }, [geneSelJob.status, geneSelJob.id])
+
+  // ── Invalidation: gene set changed ─────────────────────────
+  // gene_select/fraction change WHICH GENES the network is built from, which changes the
+  // soft-power curve. A power chosen on the old gene set must not be carried into a run on a
+  // new one, so the whole soft-power step resets.
+  useEffect(() => {
+    setSoftPowerJob(IDLE_JOB)
+    setSoftPowers(null)
+    setSoftPowerValue('')
+    setAnalyzeJob(IDLE_JOB)
+    setModules(null)
+    setPreservation(null)
+  }, [params.gene_select, params.fraction])
 
   // ── Polling: analyze ───────────────────────────────────────
   useEffect(() => {
@@ -60,22 +117,30 @@ export default function App() {
         const { status, error } = await getStatus(analyzeJob.id)
         setAnalyzeJob((j) => ({ ...j, status, error: error ?? null }))
         if (status === 'done') {
+          // Both /analyze and /module-preservation write modules.csv for the network
+          // they built, so the module table is fetched the same way in either mode.
           const rows = await getModules(analyzeJob.id)
           setModules(Array.isArray(rows) ? rows : [])
+          if (compare) {
+            const pres = await getPreservation(analyzeJob.id)
+            setPreservation(Array.isArray(pres) ? pres : [])
+          }
         }
       } catch (e) {
         setAnalyzeJob((j) => ({ ...j, status: 'failed', error: e.message }))
       }
     }, 5000)
     return () => clearInterval(iv)
-  }, [analyzeJob.status, analyzeJob.id])
+  }, [analyzeJob.status, analyzeJob.id, compare])
 
   // ── Actions ────────────────────────────────────────────────
   const handleRunSoftPowers = useCallback(async () => {
     setSoftPowerJob({ id: null, status: 'running', error: null })
     setAnalyzeJob(IDLE_JOB)
     setModules(null)
+    setPreservation(null)
     setSoftPowerValue('')
+    setSoftPowers(null)
     try {
       const { job_id } = await runSoftPowers(params)
       setSoftPowerJob({ id: job_id, status: 'running', error: null })
@@ -84,27 +149,55 @@ export default function App() {
     }
   }, [params])
 
+  const handleRunGeneSelection = useCallback(async () => {
+    setGeneSelJob({ id: null, status: 'running', error: null })
+    setGeneSelection(null)
+    try {
+      const { job_id } = await runGeneSelection(params)
+      setGeneSelJob({ id: job_id, status: 'running', error: null })
+    } catch (e) {
+      setGeneSelJob({ id: null, status: 'failed', error: e.message })
+    }
+  }, [params])
+
+  // Adopting a fraction from the sweep goes through setParams, so the invalidation effect
+  // above fires and the soft-power step resets — exactly as if it were typed by hand.
+  const handleUseFraction = useCallback((fraction) => {
+    setParams((p) => ({ ...p, gene_select: 'fraction', fraction }))
+  }, [])
+
   const handleRunAnalyze = useCallback(async () => {
     setAnalyzeJob({ id: null, status: 'running', error: null })
     setModules(null)
+    setPreservation(null)
+    const body = { ...params, soft_power: Number(softPowerValue) }
     try {
-      const { job_id } = await runAnalyze({
-        ...params,
-        soft_power: Number(softPowerValue),
-      })
+      const { job_id } = compare
+        ? await runModulePreservation(body)
+        : await runAnalyze(body)
       setAnalyzeJob({ id: job_id, status: 'running', error: null })
     } catch (e) {
       setAnalyzeJob({ id: null, status: 'failed', error: e.message })
     }
-  }, [params, softPowerValue])
+  }, [params, softPowerValue, compare])
 
   const activeStep = deriveStep(softPowerJob.status, analyzeJob.status)
+
+  // In comparison mode the soft-power curve is computed on the reference condition only,
+  // so ref_group must be set before the first phase runs, not just the second.
+  const conditionsReady = !compare || (
+    params.condition_col.trim() &&
+    (params.ref_group ?? '').trim() &&
+    (params.query_group ?? '').trim() &&
+    params.ref_group !== params.query_group
+  )
 
   const canRunSoftPowers = (
     params.h5seurat_path.trim() &&
     params.out_dir.trim() &&
     params.cell_type_col.trim() &&
     params.group_name.trim() &&
+    conditionsReady &&
     softPowerJob.status !== 'running'
   )
 
@@ -112,6 +205,7 @@ export default function App() {
     softPowerJob.status === 'done' &&
     softPowerValue.trim() !== '' &&
     !isNaN(Number(softPowerValue)) &&
+    conditionsReady &&
     analyzeJob.status !== 'running'
   )
 
@@ -132,7 +226,19 @@ export default function App() {
       <div className="workspace">
         {/* ── Left: Parameters ── */}
         <aside className="params-panel">
-          <ParamForm params={params} onChange={setParams} />
+          <ParamForm
+            params={params}
+            onChange={setParams}
+            onRunGeneSelection={handleRunGeneSelection}
+            geneSelectionRunning={geneSelJob.status === 'running'}
+          />
+
+          <JobStatus
+            status={geneSelJob.status}
+            jobId={geneSelJob.id}
+            error={geneSelJob.error}
+            label="Gene selection"
+          />
 
           <button
             className="btn btn-primary"
@@ -166,7 +272,11 @@ export default function App() {
                   placeholder="e.g. 9"
                   autoFocus
                 />
-                <span className="hint">Pick the lowest power where scale-free fit ≥ 0.80</span>
+                <span className="hint">
+                  {softPowers?.recommended_power != null
+                    ? `Prefilled with ${softPowers.recommended_power} — the lowest power reaching R² ≥ ${softPowers.sft_threshold}. See the table on the right.`
+                    : 'Pick the lowest power where scale-free fit ≥ 0.80'}
+                </span>
               </div>
 
               <button
@@ -174,14 +284,14 @@ export default function App() {
                 onClick={handleRunAnalyze}
                 disabled={!canRunAnalyze}
               >
-                Run Full Pipeline
+                {compare ? 'Run Module Preservation' : 'Run Full Pipeline'}
               </button>
 
               <JobStatus
                 status={analyzeJob.status}
                 jobId={analyzeJob.id}
                 error={analyzeJob.error}
-                label="Full pipeline"
+                label={compare ? 'Module preservation' : 'Full pipeline'}
               />
             </>
           )}
@@ -193,6 +303,14 @@ export default function App() {
             softPowerJobId={softPowerJob.status === 'done' ? softPowerJob.id : null}
             analyzeJobId={analyzeJob.status === 'done' ? analyzeJob.id : null}
             modules={modules}
+            preservation={preservation}
+            refGroup={params.ref_group}
+            queryGroup={params.query_group}
+            softPowers={softPowers}
+            geneSelectionJobId={geneSelJob.status === 'done' ? geneSelJob.id : null}
+            geneSelection={geneSelection}
+            onUseFraction={handleUseFraction}
+            outDir={params.out_dir}
           />
         </section>
       </div>

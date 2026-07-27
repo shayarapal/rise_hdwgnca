@@ -51,14 +51,14 @@ When implementing, use `PROMPT_TEMPLATE.md` and add a CHANGELOG entry.
 
 ---
 
-## Module preservation
+## Module preservation via NetRep (faster alternative)
 
 | Field | Value |
 |---|---|
-| hdWGCNA function | `ModulePreservation(seurat_obj, seurat_ref, wgcna_name)` |
-| New endpoints | `POST /module-preservation` → job_id; `GET /results/{job_id}/preservation` → JSON |
-| Extra input | Path to a second reference `.h5Seurat` file |
-| Notes | Computationally intensive — may need `workers = 4` in `entrypoint.R` |
+| hdWGCNA function | `ModulePreservationNetRep(seurat_query, seurat_ref, name, n_permutations, n_threads, TOM_use, wgcna_name, wgcna_name_ref)` |
+| Change to existing | A `method` switch on the existing `POST /module-preservation` |
+| Extra input | None, but the **query** needs its own network (`ConstructNetwork`) so a query TOM exists for `TOM_use` |
+| Notes | Needs the `NetRep` package, not currently in `install.R`. Plots via `PlotModulePreservationLollipop`. The permutation-based `ModulePreservation` already wrapped is the tutorial's default path; add this only if runtime becomes the bottleneck. |
 
 ---
 

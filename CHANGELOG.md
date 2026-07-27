@@ -8,6 +8,58 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Soft power is now a computed number, not a guess.** `TestSoftPowers()` always computed the
+  numeric scale-free-fit table, but nothing ever called `GetPowerTable()` — the only output was a
+  PNG, so a power could only be chosen by eye. The pipeline now writes `soft_power_table.csv` and
+  `soft_power_recommendation.json`, and `GET /results/{job_id}/soft-powers` returns the table plus
+  two recommendations:
+  - `recommended_power` — smallest `Power` with `SFT.R.sq >= 0.8` **and** `Power > 3`. This
+    reproduces `ConstructNetwork(soft_power = NULL)`'s own rule exactly, so the recommendation and
+    the network it would build can never disagree.
+  - `smallest_power` — smallest `Power` with `SFT.R.sq >= 0.8`, no floor. hdWGCNA's `min_power = 3`
+    means it can never auto-select powers 1–3, so this can legitimately be lower; `differ` flags it.
+  On the GSE243639 DA object (`fraction = 0.05`) both resolve to **4** (R² = 0.837).
+  The UI prefills the soft-power input with `recommended_power` and highlights the qualifying rows.
+- `POST /gene-selection` + `GET /results/{job_id}/gene-selection[-plot]` — sweeps candidate
+  `fraction` values and reports how many genes each keeps. hdWGCNA ships no tuner for `fraction`
+  (there is no `TestSoftPowers` analogue), but gene selection runs on the raw object *before*
+  metacells, so the whole sweep costs one object load. Each candidate calls the real
+  `SetupForWGCNA` + `GetWGCNAGenes` — nothing is reimplemented — and each is isolated in a
+  `tryCatch`, since `SelectNetworkGenes` errors at 0 genes and warns at ≤ 100.
+- `gene_select` and `fraction` are now request parameters (were hardcoded to `"fraction"` / `0.05`).
+  Both default to `None` in the backend so the r-service still owns the defaults. `"custom"` is
+  rejected: it needs a `gene_list`, and this service takes no such parameter.
+- `enableWGCNAThreads()` via the `WGCNA_THREADS` env var (default 4). WGCNA correlation work was
+  running single-threaded. This is a **multiplier**: `entrypoint.R` runs 2 future workers, so 4
+  threads is up to 8 extra R processes — set `WGCNA_THREADS=1` to disable. Falls back to
+  `allowWGCNAThreads()` (thread count without a nested cluster) if the cluster cannot be created.
+- `pipeline_libs()` now attaches `WGCNA`, `tidyverse`, `cowplot`, `igraph`, `enrichR` to match the
+  reference analysis preamble. `enrichR` is attached only; no enrichment is run.
+- The soft-power plot is also written as `soft_power_plot.pdf` (`ggsave`, 10×5), reachable through
+  the file browser. The plot now marks the recommended power via `PlotSoftPowers(selected_power=)`.
+
+### Fixed
+- **`ConstructNetwork(soft_power = NULL)` silently yields `Inf`** when no power clears the
+  scale-free threshold: its rule is `subset(...) %>% .$Power %>% min`, and `min(numeric(0))` is
+  `Inf`, which it passes into WGCNA without complaint. `recommend_power()` returns `null` plus an
+  explicit warning instead, and `/analyze` + `/module-preservation` now reject a non-finite
+  `soft_power` at the boundary.
+- `/results/{job_id}/soft-powers` uses `@serializer json list(na = "null")` rather than
+  `unboxedJSON`, whose `toJSON()` defaults encode `NA_integer_` as the **string `"NA"`** and `NULL`
+  as `{}` — either of which would reach the client as a truthy value in exactly the case
+  (no qualifying power) the caller most needs to detect.
+- **`r-service/Dockerfile` never copied `seuratdisk_compat.R`**, which `plumber.R` sources at
+  startup — the container could not boot.
+- **`frontend/vite.config.js` did not proxy `/module-preservation`**, so comparison mode was broken
+  under `make run-ui`. `frontend/nginx.conf` was missing `module-preservation` and `files` too.
+- `ConstructNetwork` now passes `overwrite_tom = TRUE`. It defaulted to `FALSE`, reusing any TOM
+  already in `out_dir`; now that `fraction` can change the gene set, a stale TOM is not merely old
+  but built on **different genes**, which would silently produce modules for genes nobody asked for.
+- `SetupForWGCNA` errors if gene selection yields 0 genes, naming the parameter responsible.
+  `gene_select`/`fraction` are not `SetupForWGCNA` formals — they ride through `...` to
+  `SelectNetworkGenes` — so this also trips if a future hdWGCNA stops forwarding them.
+
 ### Known issues
 - `MetacellsByGroups` still uses `reduction = "pca"` and `max_shared = 15`, where the hdWGCNA
   tutorial uses `reduction = 'harmony'` and `max_shared = 10`. **Deliberate, not an oversight.**
@@ -20,7 +72,67 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Only **11 of 29 donors** (4 PD, 7 control) clear `MetacellsByGroups(min_cells = 100)` for
   dopaminergic neurons — PD brains have lost the very cells being counted. Fine for a pooled
   network, but a PD-vs-control comparison built on 4 PD donors is underpowered. A property of
-  the data, not a bug.
+  the data, not a bug. **`/module-preservation` now writes `donor_counts.csv` on every run so
+  this n sits next to the result rather than being buried.**
+
+---
+
+## [0.5.0] - 2026-07-13
+
+> **The bridge can now answer the question the project was built for.** `/analyze` only ever
+> produced a single pooled network; comparing PD against control required
+> `ModulePreservation`, which was unwrapped. It now is.
+
+### Added
+- **`POST /module-preservation`** — reference/query module preservation, wrapping hdWGCNA's
+  `ProjectModules` + `ModulePreservation`. Splits the input object on `condition_col`, builds the
+  full network in `ref_group`, projects those modules into `query_group`, and scores whether each
+  one survives. Same pattern as the existing endpoints: file-path in, `job_id` out, poll, fetch.
+  - Required: the six base fields plus `soft_power`, `condition_col`, `ref_group`, `query_group`
+  - Optional: `n_permutations` (default **250**, the value used in the hdWGCNA tutorial — the
+    `ModulePreservation()` default is 500), `preservation_name` (default `"<ref>-vs-<query>"`)
+  - Call order follows the [tutorial](https://smorabit.github.io/hdWGCNA/articles/module_preservation.html)
+    exactly: `ProjectModules` runs **before** the query's metacells, and `SetDatExpr` runs on the
+    reference **before** the query. `ProjectModules` invokes `SetupForWGCNA` and `ModuleEigengenes`
+    on the query internally, so neither is called on it directly.
+- `GET /results/{job_id}/preservation` — per-module preservation statistics as JSON, sorted
+  **least-preserved first**. Zsummary convention (Langfelder et al. 2011): `> 10` strongly
+  preserved, `2–10` weak, `< 2` not preserved.
+- `GET /results/{job_id}/preservation-plot` — `PlotModulePreservation(statistics = "summary")` PNG.
+- `GET /results/{job_id}/donor-counts` — cells per donor per condition, and which clear
+  `MetacellsByGroups(min_cells = 100)`. Written by `/module-preservation`; see *Known issues*.
+- `condition_col` + `ref_group` are now **optional** on `POST /test-soft-powers`. When given, it
+  subsets to the reference condition first, so the soft power is chosen from the curve of the
+  network `/module-preservation` will actually build — not from the pooled object.
+- `frontend/` — "Compare conditions" toggle in `ParamForm`, `PreservationTable` (Zsummary colour-
+  banded by the convention above), preservation plot + table in `ResultsPanel`. In comparison mode
+  the second-phase button calls `/module-preservation` instead of `/analyze`.
+
+### Changed
+- **De-duplicated the pipeline block in `plumber.R`.** `run_setup_through_soft_powers()` and
+  `run_full_pipeline()` held the same ~40 lines twice, which is why both the `gene_select`/`fraction`
+  fix and the `set.seed(42)` fix in 0.4.0 had to be applied in two places. Now
+  `setup_and_metacells()` / `test_soft_powers()` / `build_network()` / `write_module_outputs()`,
+  shared by all three job entrypoints. The result endpoints likewise share `serve_csv()` /
+  `serve_png()`. No hdWGCNA call, argument, or default changed.
+- `/module-preservation` reuses the existing result filenames (`modules.csv`, `network_plot.png`,
+  `soft_power_plot.png`) for the **reference** network, so `/results/{job_id}/modules`, `/plot` and
+  `/soft-power-plot` work against a preservation job with no new code.
+
+### Fixed
+- **`GET /results/{job_id}/modules` was double-encoding its response.** The handler called
+  `toJSON(df, ...)` *and* declared `@serializer unboxedJSON`, so plumber JSON-encoded the
+  already-JSON string: clients received a quoted string (`"[{\"gene\":...}]"`) instead of an array
+  of row objects. `frontend/src/App.jsx` guards with `Array.isArray(rows) ? rows : []`, so the
+  module table silently rendered **empty** rather than erroring. The handler now returns the
+  data.frame and lets the serializer encode it once. Caught by calling the live endpoint; the
+  phase-2 tests mock the R service and so could not see it.
+- README endpoint table said the backend listens on **8080**; `docker-compose.yml`, the `Makefile`
+  and the Vite proxy all say **8200**.
+- A missing metadata column surfaced as `all arguments must have the same length` from deep inside
+  `as.data.frame(table(...))`. `run_module_preservation()` now validates `condition_col`,
+  `cell_type_col` and `group_by` up front and names the offending column plus the ones available;
+  a bad `ref_group`/`query_group` likewise now lists the values actually present.
 
 ---
 

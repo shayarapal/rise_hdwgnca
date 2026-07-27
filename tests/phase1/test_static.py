@@ -65,10 +65,18 @@ def test_dockerfile_port_matches_entrypoint():
 EXPECTED_ROUTES = [
     r"@post\s+/test-soft-powers",
     r"@post\s+/analyze",
+    r"@post\s+/module-preservation",
+    r"@post\s+/gene-selection",
     r"@get\s+/status/<job_id>",
     r"@get\s+/results/<job_id>/modules",
     r"@get\s+/results/<job_id>/plot",
     r"@get\s+/results/<job_id>/soft-power-plot",
+    r"@get\s+/results/<job_id>/soft-powers",
+    r"@get\s+/results/<job_id>/gene-selection",
+    r"@get\s+/results/<job_id>/gene-selection-plot",
+    r"@get\s+/results/<job_id>/preservation",
+    r"@get\s+/results/<job_id>/preservation-plot",
+    r"@get\s+/results/<job_id>/donor-counts",
 ]
 
 
@@ -78,6 +86,42 @@ def test_plumber_endpoints_defined(pattern):
     assert re.search(pattern, plumber), (
         f"plumber.R is missing an endpoint matching: {pattern}"
     )
+
+
+def test_soft_power_table_is_extracted():
+    """The numeric power table must be read out, not just plotted.
+
+    Without GetPowerTable() the only soft-power output is a PNG and no caller can pick a
+    power programmatically -- which is the bug this endpoint exists to fix.
+    """
+    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    assert "GetPowerTable(" in plumber
+    assert "soft_power_table.csv" in plumber
+
+
+def test_gene_selection_uses_real_hdwgcna():
+    """The sweep must call SetupForWGCNA/GetWGCNAGenes, never reimplement gene selection."""
+    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    assert "GetWGCNAGenes(" in plumber
+    assert "gene_selection.csv" in plumber
+
+
+def test_gene_select_not_hardcoded():
+    """gene_select/fraction must come from the request, not baked into SetupForWGCNA."""
+    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    assert "gene_select = p$gene_select" in plumber
+    assert "fraction    = p$fraction" in plumber
+
+
+def test_soft_power_never_infinite():
+    """ConstructNetwork(soft_power=NULL) resolves to Inf when no power clears 0.8.
+
+    recommend_power() must return NA instead, and /analyze must refuse a non-finite power.
+    """
+    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    assert "recommend_power" in plumber
+    assert "NA_integer_" in plumber
+    assert "is.finite(sp)" in plumber
 
 
 # ---------------------------------------------------------------------------
@@ -110,17 +154,15 @@ def test_docker_compose_backend_port():
     )
 
 
-def test_docker_compose_shared_volume_on_both_services():
-    compose = _compose()
-    services = compose["services"]
-    volumes_top = compose.get("volumes", {})
-
-    assert "shared_data" in volumes_top, "top-level volume 'shared_data' not declared"
-
+def test_docker_compose_shared_mount_on_both_services():
+    # /shared is a relative bind mount of ./local_data (host-OS-agnostic), so the same
+    # folder is visible at /shared in both containers on Windows and Linux, and users can
+    # drop .rds files into local_data/ without docker cp. Both services must mount it.
+    services = _compose()["services"]
     for svc in ("r-service", "backend"):
         svc_volumes = services[svc].get("volumes", [])
-        assert any("shared_data" in str(v) for v in svc_volumes), (
-            f"service '{svc}' does not mount the shared_data volume"
+        assert any("local_data" in str(v) and "/shared" in str(v) for v in svc_volumes), (
+            f"service '{svc}' must bind-mount ./local_data to /shared"
         )
 
 

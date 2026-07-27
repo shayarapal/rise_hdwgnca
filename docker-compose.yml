@@ -1,10 +1,19 @@
+# Bind-mounts ./local_data (gitignored) into both services at /shared, so dropping a
+# .rds/.h5Seurat file into local_data/ on the host makes it visible at the same path in
+# both containers — no `docker cp` or exec-into-container needed. Create it once with
+# `mkdir -p local_data`; `.env.example`'s SHARED_DIR=./local_data mirrors this for the
+# non-Docker dev flow, so the same folder works either way.
 services:
   r-service:
     build: ./r-service
     ports:
       - "8100:8100"
     volumes:
-      - shared_data:/shared
+      - ./local_data:/shared
+    environment:
+      # WGCNA threads PER future worker (entrypoint.R runs 2), so this is a multiplier:
+      # 2 x 4 = up to 8 extra R processes. Set to 1 to disable WGCNA's own parallelism.
+      WGCNA_THREADS: "4"
     restart: unless-stopped
 
   backend:
@@ -12,7 +21,7 @@ services:
     ports:
       - "8200:8200"
     volumes:
-      - shared_data:/shared
+      - ./local_data:/shared
     environment:
       R_SERVICE_URL: http://r-service:8100
       PORT: "8200"
@@ -29,6 +38,3 @@ services:
       - "4000:80"
     profiles:
       - frontend
-
-volumes:
-  shared_data:

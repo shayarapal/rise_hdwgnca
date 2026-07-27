@@ -8,10 +8,22 @@
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
 
-cat("==> Installing CRAN packages...\n")
+cat("==> Installing BiocManager + remotes...\n")
+install.packages(c("BiocManager", "remotes"))
+
+cat("==> Installing Bioconductor packages...\n")
+# GO.db/impute/preprocessCore/AnnotationDbi are WGCNA's dependencies and must be installed
+# BEFORE WGCNA (they are not on CRAN). The rest are hdWGCNA's deps. Getting this order wrong
+# is what silently ships an image with no WGCNA/hdWGCNA — see the Dockerfile comment.
+BiocManager::install(
+  c("GO.db", "impute", "preprocessCore", "AnnotationDbi",
+    "BiocGenerics", "GenomicRanges", "GeneOverlap", "UCell"),
+  ask    = FALSE,
+  update = FALSE
+)
+
+cat("==> Installing CRAN packages (WGCNA now that its Bioc deps exist)...\n")
 install.packages(c(
-  "BiocManager",
-  "remotes",
   "plumber",
   "future",
   "promises",
@@ -22,7 +34,9 @@ install.packages(c(
   "igraph",
   "tidyverse",
   "ggraph",
-  "patchwork"
+  "patchwork",
+  "cowplot",
+  "enrichR"
 ), dependencies = TRUE)
 
 cat("==> Installing SeuratDisk (LoadH5Seurat)...\n")
@@ -30,14 +44,11 @@ cat("==> Installing SeuratDisk (LoadH5Seurat)...\n")
 # written by Seurat v5, switch to readRDS() + .rds format instead.
 remotes::install_github("mojaveazure/seurat-disk")
 
-cat("==> Installing Bioconductor packages...\n")
-BiocManager::install(
-  c("BiocGenerics", "GenomicRanges", "GeneOverlap", "UCell"),
-  ask    = FALSE,
-  update = FALSE
-)
-
 cat("==> Installing hdWGCNA (dev branch)...\n")
 remotes::install_github("smorabit/hdWGCNA", ref = "dev")
 
-cat("==> All packages installed successfully.\n")
+# Fail loudly if the core stack did not actually install (remotes only warns on missing deps).
+cat("==> Verifying core stack loads...\n")
+suppressMessages({library(hdWGCNA); library(WGCNA)})
+cat("==> All packages installed successfully. hdWGCNA",
+    as.character(packageVersion("hdWGCNA")), "OK\n")

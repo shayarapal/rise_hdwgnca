@@ -15,17 +15,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libtiff5-dev \
     libjpeg-dev \
+    libsodium-dev \
+    libuv1-dev \
     && rm -rf /var/lib/apt/lists/*
+# libsodium-dev is required to build the R `sodium` package, which `plumber` depends on.
+# libuv1-dev is required to build `fs`, which cascades to sass -> bslib -> rmarkdown -> tidyverse.
+# Without either, install.packages() silently skips the failed package and the build exits 0,
+# then the container crash-loops at `library(plumber)` / `library(tidyverse)`.
 
-# CRAN + Bioconductor packages
-# Install in dependency order to minimise recompilation on layer cache miss
+# CRAN packages. WGCNA is deliberately NOT here: it depends on Bioconductor packages
+# (GO.db, impute, preprocessCore, AnnotationDbi) that CRAN cannot supply, so it must be
+# installed AFTER the Bioconductor step below.
 RUN Rscript -e "\
   install.packages(c( \
     'BiocManager', 'remotes', 'pak', \
     'plumber', 'future', 'promises', 'uuid', 'jsonlite', \
-    'tidyverse', 'patchwork', 'igraph', 'ggraph', \
-    'WGCNA' \
+    'tidyverse', 'patchwork', 'igraph', 'ggraph', 'cowplot', 'enrichR' \
   ), repos='https://cloud.r-project.org')"
+
+# Bioconductor packages. The first four are WGCNA's dependencies and MUST precede it —
+# without them WGCNA fails to install, hdWGCNA then fails, yet remotes only WARNS, so the
+# build would exit 0 and ship an image with no hdWGCNA. The last four are hdWGCNA's own deps.
+RUN Rscript -e "\
+  BiocManager::install(c('GO.db', 'impute', 'preprocessCore', 'AnnotationDbi', \
+    'BiocGenerics', 'GenomicRanges', 'GeneOverlap', 'UCell'), \
+    ask=FALSE, update=FALSE)"
+
+# WGCNA now that its Bioconductor dependencies are present
+RUN Rscript -e "install.packages('WGCNA', repos='https://cloud.r-project.org')"
 
 # Seurat and SeuratDisk
 # NOTE: SeuratDisk (LoadH5Seurat) is unmaintained as of 2022.
@@ -35,16 +52,18 @@ RUN Rscript -e "\
   install.packages('Seurat', repos='https://cloud.r-project.org'); \
   remotes::install_github('mojaveazure/seurat-disk')"
 
-# Bioconductor packages required by hdWGCNA
-RUN Rscript -e "\
-  BiocManager::install(c('BiocGenerics', 'GenomicRanges', 'GeneOverlap', 'UCell'), \
-    ask=FALSE, update=FALSE)"
-
 # hdWGCNA from GitHub dev branch
 RUN Rscript -e "remotes::install_github('smorabit/hdWGCNA', ref='dev')"
 
+# Build-time tripwire: install.packages() and remotes::install_github() only WARN on a failed
+# package and let the build exit 0 — so any missing runtime dependency ships silently and the
+# container crash-loops at startup. This loads EVERY package the service uses at runtime
+# (entrypoint.R + plumber.R top-level + pipeline_libs()); a missing one fails the build loudly.
+RUN Rscript -e "pkgs <- c('plumber','future','promises','uuid','jsonlite','Seurat','SeuratDisk','WGCNA','hdWGCNA','tidyverse','cowplot','patchwork','igraph','enrichR'); invisible(lapply(pkgs, function(p) suppressMessages(library(p, character.only=TRUE)))); cat('ALL', length(pkgs), 'runtime packages load OK; hdWGCNA', as.character(packageVersion('hdWGCNA')), '\n')"
+
 WORKDIR /app
-COPY entrypoint.R plumber.R ./
+# seuratdisk_compat.R is sourced by plumber.R at startup — without it the container cannot boot.
+COPY entrypoint.R plumber.R seuratdisk_compat.R ./
 
 EXPOSE 8100
 

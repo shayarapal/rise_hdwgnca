@@ -20,10 +20,47 @@ export async function runAnalyze(params) {
   return r.json(); // { job_id }
 }
 
+export async function runModulePreservation(params) {
+  const r = await fetch('/module-preservation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json(); // { job_id }
+}
+
+export async function runGeneSelection(params) {
+  const r = await fetch('/gene-selection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json(); // { job_id }
+}
+
 export async function getStatus(jobId) {
   const r = await fetch(`/status/${jobId}`);
   if (!r.ok) throw new Error(await r.text());
   return r.json(); // { status: 'running'|'done'|'failed', error? }
+}
+
+// The numeric scale-free-fit table plus both recommendations. recommended_power is what
+// ConstructNetwork(soft_power=NULL) would itself pick (R^2 >= 0.8 AND Power > 3);
+// smallest_power drops the Power > 3 floor. Either can be null when nothing reaches 0.8.
+export async function getSoftPowers(jobId) {
+  const r = await fetch(`/results/${jobId}/soft-powers`);
+  if (!r.ok) throw new Error(await r.text());
+  // { table, recommended_power, smallest_power, differ, sft_threshold, min_power,
+  //   max_sft_r_sq, warning }
+  return r.json();
+}
+
+export async function getGeneSelection(jobId) {
+  const r = await fetch(`/results/${jobId}/gene-selection`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json(); // [{ fraction, n_genes, n_all_genes, pct_of_all_genes, warning, error }]
 }
 
 export async function getModules(jobId) {
@@ -32,9 +69,23 @@ export async function getModules(jobId) {
   return r.json(); // array of module row objects
 }
 
+export async function getPreservation(jobId) {
+  const r = await fetch(`/results/${jobId}/preservation`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json(); // array of per-module preservation stat rows
+}
+
+export async function getDonorCounts(jobId) {
+  const r = await fetch(`/results/${jobId}/donor-counts`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json(); // [{ sample_id, condition, n_cells, clears_min_cells }]
+}
+
 // Image URLs — used directly as <img src={...}> to avoid loading into JS memory
-export const softPowerPlotUrl = (jobId) => `/results/${jobId}/soft-power-plot`;
-export const networkPlotUrl   = (jobId) => `/results/${jobId}/plot`;
+export const softPowerPlotUrl   = (jobId) => `/results/${jobId}/soft-power-plot`;
+export const networkPlotUrl     = (jobId) => `/results/${jobId}/plot`;
+export const preservationPlotUrl = (jobId) => `/results/${jobId}/preservation-plot`;
+export const geneSelectionPlotUrl = (jobId) => `/results/${jobId}/gene-selection-plot`;
 
 // ── Local filesystem browse / preview / export ────────────────────────────────
 
