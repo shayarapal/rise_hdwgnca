@@ -13,6 +13,47 @@ Rolls up into the Section 14 Validation Report when the audit is complete.
 
 ---
 
+# Section 14 — Validation Report
+
+**Reviewer:** AI system-check · **Branch:** `soft-power-gene-selection-audit` · all 13 audit sections complete.
+
+## Executive summary
+
+- **Overall status: PASS-WITH-WARNINGS for the *software*; the *science* does not currently support the hypothesis on this dataset.**
+- **Findings: 4 BLOCKER (all resolved), 7 WARNING, 8 NOTE.** Every engineering blocker that stopped the pipeline running (B1 Bioconductor deps, B3 system libs, B4 `ScaleData`) is fixed and verified; `/analyze` now completes end-to-end for the first time. One "blocker" (B2) is a genuine scientific result, not a bug.
+- **Plain verdict:** the pipeline is now *runnable and faithful* — it wraps real hdWGCNA calls with no reimplementation, and the R/Python/React contract is consistent. But on the GSE243639 DA object, the co-expression network is 70–77% grey at every soft power, and the target genes `CACNA1D`/`CACNA1C` do **not** robustly co-localize (their apparent co-membership appears only at power 9 and flips at power 6). This is driven by target-gene sparsity (6–8% of cells) and small donor n (4 PD / 7 control), both intrinsic to the data. **Results claiming a CACNA1D/CACNA1C co-expression module would not be defensible from this object as-is.**
+
+## Verified environment
+
+R 4.5.3 (native, x86_64, OpenBLAS) / Docker R 4.4.3; hdWGCNA 0.4.12, Seurat 5.5.0, WGCNA 1.74(native)/1.73(Docker); harmony 2.0.5(native)/1.2.3(Docker). Seeds set (`set.seed(42)` before metacells; `ConstructNetwork`/`ModulePreservation` seeded by default). Seurat v5 layer semantics correct.
+
+## Scientific validity summary
+
+- **CACNA1D module:** power-dependent — grey (p4), grey (p6), turquoise (p9).
+- **CACNA1C module:** power-dependent — grey (p4), blue (p6), turquoise (p9).
+- **Co-localized?** Not robustly — only at p9 (both in the *largest* module); cannot be claimed without power-cherry-picking.
+- **PD-vs-control sound?** Underpowered — 4 PD vs 7 control donors clear `min_cells=100`; module-eigengene comparison would be pseudoreplication-prone (W4). Only module preservation is implemented; no enrichment / no differential test (W8).
+- **Multiple-testing:** N/A (no per-module p-value stage).
+
+## What I did NOT change (flagged, left to the researcher)
+
+- **Soft power / `fraction` / `k` / `max_shared` / `network_type`** — scientific parameters; never tuned to force the targets together (B2 guardrail).
+- **B2 grey fraction / co-localization** — a finding, not a fixable bug.
+- **Metadata defaults, harmonization column** — per prior user decisions.
+
+## Suggested next steps for the researcher
+
+1. Treat the non-co-localization as a real (negative) result, or repeat on a larger/less-sparse DA dataset (Kamath 2022) where the targets clear detection more comfortably.
+2. If pursuing PD-vs-control: report the 4-donor limitation; consider pseudobulk/donor-level tests rather than treating metacells as independent.
+3. Positive control: confirm TH/SLC6A3/SLC18A2 co-cluster (N7) before trusting any module.
+4. Keep `fraction ≤ 0.06` (W3) or CACNA1C silently drops; run one heavy `/analyze` at a time (W7).
+
+## Self-check
+
+1. **Signatures verified against the installed package?** Yes — all hdWGCNA calls checked via `formals()`/`args()` on 0.4.12, not memory. 2. **Fabrication?** None — every gene count, module color, %, and RSS figure is from live execution. 3. **Flagged rather than silently fixed anything touching biology?** Yes — B2 and all scientific parameters were flagged, never tuned; only engineering bugs (B1/B3/B4) were fixed. 4. **Verified vs assumed clearly separated?** Yes — see per-step VERIFYING/RESOLVED status and the "assumptions/gaps" notes.
+
+---
+
 ## Master issue table
 
 | ID | Sev | Step/§ | Title | Status |
@@ -35,6 +76,9 @@ Rolls up into the Section 14 Validation Report when the audit is complete.
 | N6 | NOTE | 8 / §9 | `write_module_outputs` never `saveRDS`s the network object (only `modules.csv`); `PlotKMEs` used but no `GetHubGenes` hub-gene table exported | OPEN |
 | W8 | WARNING | 9 / §10 | Research question's downstream is **not implemented**: no enrichment (`enrichR` attached but never called), no differential ME test (`FindDMEs`), no trait correlation. PD-vs-control has ONLY module preservation. Pathway enrichment of the CACNA module — a core aim — cannot be produced by the pipeline | OPEN (scope; "planned" in docs/SKILLS.md) |
 | N7 | NOTE | 9 / §10 | No built-in positive/negative control. Recommend a manual sanity check: DA-identity genes TH/SLC6A3/SLC18A2 (80–95% detected) should co-cluster; if they scatter, distrust the network | OPEN (recommendation) |
+| W9 | WARNING | 10 / §11 | No path sandbox: `h5seurat_path`/`out_dir` accept ANY absolute path (no `/shared` restriction), and the service has no auth (intentional per CLAUDE.md). Fine for localhost; **must not be exposed to an untrusted network** — a caller could read/write arbitrary paths the R process can access | OPEN (deployment: bind to localhost only) |
+| N10 | NOTE | 11 / §12 | In Docker, "Browse files" (`files.py`) sees the backend container FS (`/shared` + container root), **not the Windows host** — on the PC, users must drop data into `local_data/` (appears as `/shared`); browsing won't show their C: drive | OPEN (deployment UX) |
+| N11 | NOTE | 12 / §13 | Frontend validates presence only (non-empty), not path-existence or metadata-column correctness, and doesn't trim string params on submit. Mistakes fail gracefully with clear R errors (`require_columns` lists available cols), and the file browser mitigates path typos | OPEN (low; optional hardening) |
 
 ## Verified-GOOD (passed checks — no action)
 
@@ -147,13 +191,35 @@ Built the real network at `soft_power=4` (the §7 auto-recommendation) on the DA
 
 **10.6 Negative controls — all candidate genes present + survive `fraction=0.05`:** SNCA 85.2%, PINK1 73.7%, PARK7 43.7%, GBA 30.8%, LRRK2 10.4%, PRKN 11.3%, and DA-identity TH 80.0% / SLC6A3 88.0% / SLC18A2 95.5%. ⇒ **N7**: no control is built in; recommend using the highly-expressed DA-identity trio (TH/SLC6A3/SLC18A2) as a positive control — they *should* co-cluster in a coherent module; if they don't, the network is untrustworthy. Their high detection (80–95%) also contrasts sharply with the target genes (CACNA1D 8%, CACNA1C 6%), reinforcing that the co-localization difficulty (B2) is driven by **target-gene sparsity** (W3), not a pipeline defect.
 
-### Step 1 — §2 Environment & Dependency Audit
+### Step 10 — §11 R-Microservice (plumber bridge)
+
+**11.1 Endpoint↔function fidelity — PASS.** Every endpoint calls a real, verified hdWGCNA/Seurat function (signatures checked against installed 0.4.12 throughout this audit). No algorithm is reimplemented: the gene sweep uses the real `SelectNetworkGenes`/`GetWGCNAGenes`; `recommend_power` only *reads* `GetPowerTable()` and applies the documented threshold rule.
+
+**11.2 Parameter passthrough — PASS.** UI→backend→R is unchanged: `group_by=[col0,col1]` reaches `MetacellsByGroups(group.by=...)` in order; `group_by[[2]]` (sample_id) is used consistently for `ModuleEigengenes(group.by.vars=)` and the `donor_counts.csv` sample column; `cell_type_col`/`group_name`/`wgcna_name`/`k`/`max_shared`/`network_type` all forwarded verbatim (`model_dump(exclude_none=True)`).
+
+**11.3 Path safety — W9.** `load_seurat` validates existence, extension (.rds/.h5Seurat), and `inherits("Seurat")`, returning **clear** errors (not generic 500s) that propagate to the job status. But there is **no sandbox** — any absolute path is accepted for input and output, and there's no auth (intentional per CLAUDE.md). Safe for localhost; do not expose to a network.
+
+**11.4 Async/job handling — PASS.** `future_promise(...) %...>% finish_job %...!% fail_job`: a failed R step sets status `failed` with `conditionMessage(err)` (verified earlier — the `Cannot find file …` message surfaced through `/status`), never hangs on `running`. Unknown job → 404.
+
+**11.5 Result serialization — PASS.** The earlier double-encoding bug is fixed (`serve_csv` returns the data.frame; the serializer JSON-encodes once). kME precision is **lossless**: `write.csv`→`read.csv` round-trips to full 15 significant digits (verified, max abs error 0). PNGs written via `save_png` and served with `contentType image/png`.
+
+**11.6 Resource limits — see W7.** `/analyze` peaks ~9.4 GB; the Docker VM / host must allow it, and 2 concurrent jobs (2 future workers) ≈ 19 GB.
 
 **W1 — Environment drift (PC/Docker vs verified env).** Native = R 4.5.3 + OpenBLAS + hdWGCNA 0.4.12 (tarball). Docker `r-service/Dockerfile` = `rocker/r-ver:4.4` + rocker default BLAS + `install_github('smorabit/hdWGCNA', ref='dev')` (unpinned HEAD). Different R minor, BLAS, and an unpinned hdWGCNA can shift module boundaries or behavior. This session's results (soft power 4; 7,465 genes) were on the native env and aren't guaranteed identical on the PC. *Fix (flag, ask first — reproducibility):* pin hdWGCNA to a dated commit, optionally pin R. Verify by fingerprinting the built image.
 
 **W2 — Thread oversubscription.** `OMP_NUM_THREADS` unset ⇒ OpenBLAS threads run under `WGCNA_THREADS=4` × `future workers=2`. Perf/OOM risk on low-core machines. *User confident on PC hardware → ACCEPTED.* Cheap insurance if ever revisited: `OMP_NUM_THREADS=1` in compose, `WGCNA_THREADS` = PC core count.
 
 **N1** — R 4.5.3 > tutorial/Docker 4.4; in-band (≥4.2), recorded for reproducibility.
+
+### Step 11 — §12 Python Backend
+
+All checks pass — the backend is a thin, faithful proxy.
+- **12.1 Contract — PASS.** 18 `PipelineRequest` fields cover every field the frontend sends (frontend params ⊆ model); optionals absent from the UI (`n_permutations`, `preservation_name`, `fractions`) default in R. `exclude_none=True` keeps the wire body minimal.
+- **12.2 Cross-container path — PASS (BLOCKER avoided).** Backend forwards `h5seurat_path`/`out_dir` unchanged; both containers bind-mount `./local_data` at the identical `/shared`, so paths resolve the same in Python and R. The prompt's classic cross-container path bug does not apply.
+- **12.3 Polling/status — PASS.** Backend is stateless; frontend polls and fetches results only on `done`. Errors propagate with the R status code.
+- **12.4 Timeouts — PASS.** `httpx.Timeout(10.0, read=None)` + async job model → long builds never time out.
+- **12.5 No hidden reprocessing — PASS.** No data operations in `main.py`/`client.py`; orchestration only.
+- **N10** — Docker "Browse files" scope (backend container FS, not Windows host).
 
 ### Step 2 — §3 Input Data Integrity Audit
 
