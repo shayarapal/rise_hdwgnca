@@ -27,8 +27,14 @@ between conditions.
   that module's genes are collectively highly active
 - `control_network/module_correlogram.png` (+ `.pdf`) — pairwise module eigengene correlation
   heatmap (`ModuleCorrelogram`); modules that cluster together likely reflect related biology
+- `control_network/module_scores_umap.png` — per-cell UCell module scores (top 25 hub genes per
+  module, rank-based, outlier-robust) projected onto the UMAP (`ModuleExprScore` + `ModuleFeaturePlot`)
 - `control_network/soft_power_plot.png`, `soft_power_table.csv`, `soft_power_recommendation.json`
-- `pd_network/` — same seven outputs, PD condition
+- `pd_network/` — same eight outputs, PD condition
+
+**hME vs. module score:** use hMEs (`module_eigengene_umap.png`) for statistical analyses —
+they're continuous and directly comparable across cells. Use UCell scores
+(`module_scores_umap.png`) for visualization — more intuitive, less sensitive to outlier cells.
 
 ## What this is and isn't
 

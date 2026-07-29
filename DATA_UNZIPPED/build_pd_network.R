@@ -86,4 +86,25 @@ ModuleCorrelogram(obj, wgcna_name = p$wgcna_name)
 dev.off()
 log_mem("after ModuleCorrelogram(PD)")
 
+obj <- ModuleExprScore(
+  obj,
+  n_genes    = 25,
+  method     = "UCell",
+  wgcna_name = p$wgcna_name
+)
+log_mem("after ModuleExprScore(PD, UCell)")
+
+plot_list_scores <- ModuleFeaturePlot(
+  obj,
+  wgcna_name   = p$wgcna_name,
+  features     = "scores",
+  order_points = TRUE,
+  ucell        = TRUE,
+  reduction    = "umap"
+)
+stopifnot(length(plot_list_scores) > 0)
+p_scores <- wrap_plots(plot_list_scores, ncol = 4)
+ggsave(file.path(p$out_dir, "module_scores_umap.png"), plot = p_scores, width = 16, height = 12, dpi = 150)
+log_mem("after ModuleFeaturePlot(PD, scores)")
+
 cat("DIAGNOSTIC COMPLETE\n")
