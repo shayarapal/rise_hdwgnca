@@ -22,8 +22,11 @@ between conditions.
 - `control_network/modules.csv` — full gene→module table, control condition
 - `control_network/dendrogram.png` — gene clustering dendrogram with module color bar (`PlotDendrogram`)
 - `control_network/network_plot_kME.png` — per-module kME plot (`PlotKMEs`), control condition
+- `control_network/module_eigengene_umap.png` — harmonized module eigengene (hME) activity projected
+  onto the single-cell UMAP, one panel per module (`ModuleFeaturePlot`); high values = cells where
+  that module's genes are collectively highly active
 - `control_network/soft_power_plot.png`, `soft_power_table.csv`, `soft_power_recommendation.json`
-- `pd_network/` — same five outputs, PD condition
+- `pd_network/` — same six outputs, PD condition
 
 ## What this is and isn't
 
