@@ -84,11 +84,20 @@ the memory ceiling that blocked the human PD-vs-control preservation test. This 
 human data, a formal `ModulePreservation` (SNc-as-ref vs VTA-as-query) permutation test is
 actually feasible here on this hardware if wanted next.
 
+## Done: formal ModulePreservation test, SNc vs VTA (2026-07-29)
+
+`DATA_GSE233866/run_preservation_mouse.R`, 200 permutations, completed in ~12 min at 3.88GB peak
+(no memory issues at all, unlike the human data). Full writeup in
+`analysis_results/mouse_GSE233866/README.md`.
+
+Result: CACNA1D's module (turquoise) has Zsummary=20.4 — strongly preserved (>10 threshold),
+ranking 3rd of 8 real modules. Refines the earlier qualitative finding: the gene community
+CACNA1D belongs to in SNc clearly holds together in VTA too, even though CACNA1D itself got
+assigned a different-colored module (brown) when VTA was analyzed independently — likely a shift
+in CACNA1D's own relative connectivity within a stable neighborhood, not a dissolving module.
+
 ## Next steps (not yet started)
 
-1. Consider running the formal `ModulePreservation` test (SNc vs VTA) now that resource
-   constraints aren't a blocker for this dataset — would give a statistical Zsummary rather than
-   just qualitative module-membership comparison.
-2. Only after that: revisit whether the PD-vs-control angle (within SNc, and eventually within
-   VTA, now possible via this dataset's own 6-OHDA lesion arm) is still worth pursuing, and
-   whether DME (differential module eigengene) analysis is the right tool for it.
+1. Revisit whether the PD-vs-control angle (within SNc, and eventually within VTA, now possible
+   via this dataset's own 6-OHDA lesion arm) is still worth pursuing, and whether DME
+   (differential module eigengene) analysis is the right tool for it.

@@ -42,6 +42,46 @@ becomes available.
 `module_eigengene_umap.png`, `module_scores_umap.png` (UCell), `module_correlogram.png`/`.pdf`,
 `modules.csv`, `enrichr_table.csv` + `enrichr_plots/*.pdf`, and soft-power diagnostics.
 
+## Formal preservation test (SNc as reference, VTA as query, 200 permutations)
+
+Ran to completion easily on this dataset (peaked at 3.88GB, ~12 minutes) — the memory ceiling
+that blocked this same test on the human data was never a factor here.
+
+By WGCNA convention (Langfelder et al. 2011): Zsummary > 10 = strongly preserved, 2–10 =
+weak/moderate, < 2 = not preserved.
+
+| Module | Zsummary (preservation) | Rank (of 8 real modules) |
+|---|---|---|
+| brown | 53.1 | 1 |
+| green | 47.2 | 2 |
+| **turquoise (CACNA1D)** | **20.4** | **3** |
+| yellow | 14.9 | 4 |
+| blue | 14.6 | 5 |
+| red | 10.9 | 6 |
+| black | 7.9 | 7 |
+| pink | 7.6 | 8 |
+
+(`gold` and `grey` are WGCNA's internal random-control and unassigned-gene bins respectively —
+not real modules, excluded from ranking. `moduleSize.obs` in `preservation.csv` is capped at
+1000 genes for the largest modules — a standard WGCNA computational-tractability limit for the
+permutation statistics, not each module's true gene count.)
+
+**CACNA1D's module (turquoise) is strongly preserved (Zsummary=20.4), ranking 3rd of 8.** This
+refines, rather than contradicts, the qualitative finding above: even though CACNA1D was
+independently assigned to a *different-colored* module when VTA alone was analyzed (brown), the
+broader gene community it belongs to in SNc clearly still holds together as a coherent
+co-expression unit within VTA data. The module-identity shift likely reflects CACNA1D's own
+*relative* connectivity/position shifting within an otherwise-stable neighborhood, rather than
+that neighborhood itself dissolving between regions.
+
+All 6 animals cleared the `min_cells=100` metacell threshold in both conditions, though VTA's
+smallest sample (s450, 102 cells) was close to that floor — worth keeping in mind if this result
+is revisited with more data.
+
+Files: `snc_vs_vta_preservation/preservation.csv`, `preservation_plot.png`, plus the reference
+(SNc) network's own `modules.csv`, `network_plot.png`, soft-power diagnostics, and
+`donor_counts.csv`.
+
 ## Caveats
 
 - Sox6/Calb1-only cells were left unlabeled (1,456 of 4,514 DA neurons) rather than forced into

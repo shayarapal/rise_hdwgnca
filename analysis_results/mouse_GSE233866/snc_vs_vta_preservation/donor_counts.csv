@@ -1,0 +1,13 @@
+"sample_id","condition","n_cells","clears_min_cells"
+"s370","SNc",443,TRUE
+"s372","SNc",393,TRUE
+"s449","SNc",375,TRUE
+"s358","SNc",373,TRUE
+"s454","SNc",340,TRUE
+"s450","SNc",302,TRUE
+"s370","VTA",172,TRUE
+"s372","VTA",166,TRUE
+"s358","VTA",162,TRUE
+"s449","VTA",121,TRUE
+"s454","VTA",109,TRUE
+"s450","VTA",102,TRUE
