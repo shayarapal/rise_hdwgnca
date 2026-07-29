@@ -77,4 +77,13 @@ p_hme <- wrap_plots(plot_list_hme, ncol = 4)
 ggsave(file.path(p$out_dir, "module_eigengene_umap.png"), plot = p_hme, width = 16, height = 12, dpi = 150)
 log_mem("after ModuleFeaturePlot(control)")
 
+# ModuleCorrelogram uses base R graphics -- pdf() device, not ggsave()
+pdf(file.path(p$out_dir, "module_correlogram.pdf"), width = 8, height = 7)
+ModuleCorrelogram(obj, wgcna_name = p$wgcna_name)
+dev.off()
+png(file.path(p$out_dir, "module_correlogram.png"), width = 1000, height = 875, res = 125)
+ModuleCorrelogram(obj, wgcna_name = p$wgcna_name)
+dev.off()
+log_mem("after ModuleCorrelogram(control)")
+
 cat("DIAGNOSTIC COMPLETE\n")

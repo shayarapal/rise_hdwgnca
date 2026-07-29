@@ -30,7 +30,7 @@ RUN Rscript -e "\
   install.packages(c( \
     'BiocManager', 'remotes', 'pak', \
     'plumber', 'future', 'promises', 'uuid', 'jsonlite', \
-    'tidyverse', 'patchwork', 'igraph', 'ggraph', 'cowplot', 'enrichR' \
+    'tidyverse', 'patchwork', 'igraph', 'ggraph', 'cowplot', 'enrichR', 'corrplot' \
   ), repos='https://cloud.r-project.org')"
 
 # Bioconductor packages. The first four are WGCNA's dependencies and MUST precede it —
