@@ -39,6 +39,11 @@ DATA_UNZIPPED/*
 GSE243639_Clinical_data.csv
 hdwgcna_out/
 
+# GSE233866 (mouse SNc/VTA atlas, ~330 MB raw counts + built Seurat objects).
+# Download from GEO; rebuild with DATA_GSE233866/build_seurat_GSE233866.R.
+DATA_GSE233866/*
+!DATA_GSE233866/*.R
+
 # OS
 .DS_Store
 Thumbs.db

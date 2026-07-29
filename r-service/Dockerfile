@@ -55,6 +55,11 @@ RUN Rscript -e "\
 # hdWGCNA from GitHub dev branch
 RUN Rscript -e "remotes::install_github('smorabit/hdWGCNA', ref='dev')"
 
+# harmony -- used by the DATA_*/build_seurat_*.R scripts for animal/donor batch
+# correction before saving a Seurat object (not called by the bridge itself).
+# R.utils -- data.table::fread() needs it to read .gz files directly.
+RUN Rscript -e "install.packages(c('harmony', 'R.utils'), repos='https://cloud.r-project.org')"
+
 # Build-time tripwire: install.packages() and remotes::install_github() only WARN on a failed
 # package and let the build exit 0 — so any missing runtime dependency ships silently and the
 # container crash-loops at startup. This loads EVERY package the service uses at runtime

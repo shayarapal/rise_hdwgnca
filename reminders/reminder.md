@@ -52,6 +52,23 @@ Parkinsonism lesion model" — Yaghmaeian Salmani et al., Karolinska Institute
   atlas, what to start with) and `GSE233866_lesion_intact_counts.csv.gz` (282.7MB — the 6-OHDA
   experiment, for later)
 
+## Progress: GSE233866 Seurat object built (2026-07-29)
+
+`DATA_GSE233866/build_seurat_GSE233866.R` ran successfully. Note: `data.table::fread` silently
+mis-parses this file's header (which has one fewer field than the data rows, no name for the
+gene-symbol column) — it discards the real header and uses the first gene's data row as column
+names instead, losing a gene and all cell barcodes. Fixed by reading the header line separately
+and passing `header=FALSE, skip=1` to fread. If rebuilding, do not revert to plain
+`fread(file, header=TRUE)`.
+
+Results: 8,311 → 8,183 cells post-QC. 4,514 Dopaminergic Neurons (Th/Slc6a3/Ddc/Slc18a2) vs 3,669
+non-DA. Within DA neurons, Sox6/Calb1 split: **2,226 SNc, 832 VTA**, 1,456 left unlabeled
+(ambiguous — both or neither marker). Saved as `seurat_GSE233866_SNc_VTA.rds` (+ intermediate
+`seurat_GSE233866_clustered.rds`, pre-DA/region-labeling checkpoint).
+
+Also added to r-service/Dockerfile: `harmony` (animal batch correction) and `R.utils`
+(fread .gz support) — both were missing.
+
 ## Next steps (not yet started)
 
 1. Download and stage GSE233866 (`untreated_counts.csv.gz` first).
