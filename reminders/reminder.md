@@ -69,17 +69,26 @@ non-DA. Within DA neurons, Sox6/Calb1 split: **2,226 SNc, 832 VTA**, 1,456 left 
 Also added to r-service/Dockerfile: `harmony` (animal batch correction) and `R.utils`
 (fread .gz support) — both were missing.
 
+## Done: SNc and VTA networks built and compared (2026-07-29)
+
+Both built via `DATA_GSE233866/build_snc_network.R` / `build_vta_network.R`. Full writeup in
+`analysis_results/mouse_GSE233866/README.md`. Headline: CACNA1D lands in a different module in
+each region (SNc: turquoise, kME=0.048; VTA: brown, kME=0.094) but both connections are weak —
+much weaker than the human PD-vs-control result — likely a sample-size effect (2,226 / 832 cells
+vs. tens of thousands in the human data), not necessarily a weaker true biological signal.
+SNc resolved into 9 modules vs. VTA's 39 (many small) — also plausibly a sample-size artifact,
+worth rechecking with a larger VTA dataset if one turns up.
+
+Both networks were very cheap to build (SNc peaked at 3.87GB RAM, VTA at 2.25GB) — nowhere near
+the memory ceiling that blocked the human PD-vs-control preservation test. This means, unlike the
+human data, a formal `ModulePreservation` (SNc-as-ref vs VTA-as-query) permutation test is
+actually feasible here on this hardware if wanted next.
+
 ## Next steps (not yet started)
 
-1. Download and stage GSE233866 (`untreated_counts.csv.gz` first).
-2. Build Seurat object, using this dataset's own Sox6/Calb1-based (or however it's annotated)
-   SNc/VTA split rather than assuming a marker set from a different study.
-3. Run the same pipeline (build network → dendrogram → kME → correlogram → hME/UCell UMAP →
-   Enrichr) separately on the SNc and VTA populations within this mouse dataset.
-4. Compare CACNA1D's module membership, kME, and enrichment between mouse SNc and mouse VTA.
-   Note as a caveat throughout: this is a same-species (mouse) finding — translating it back to
-   the human SNc results already in `analysis_results/` is a separate, later inference, not
-   something to claim directly.
-5. Only after that: revisit whether the PD-vs-control angle (within SNc, and eventually within
+1. Consider running the formal `ModulePreservation` test (SNc vs VTA) now that resource
+   constraints aren't a blocker for this dataset — would give a statistical Zsummary rather than
+   just qualitative module-membership comparison.
+2. Only after that: revisit whether the PD-vs-control angle (within SNc, and eventually within
    VTA, now possible via this dataset's own 6-OHDA lesion arm) is still worth pursuing, and
    whether DME (differential module eigengene) analysis is the right tool for it.
