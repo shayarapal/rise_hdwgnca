@@ -36,6 +36,35 @@ between conditions.
 they're continuous and directly comparable across cells. Use UCell scores
 (`module_scores_umap.png`) for visualization — more intuitive, less sensitive to outlier cells.
 
+- `control_network/enrichr_table.csv`, `enrichr_plots/*.pdf` — GO_Biological_Process_2023 +
+  KEGG_2021_Human enrichment per module (`RunEnrichr` / `EnrichrBarPlot`; top 100 genes/module,
+  bar plots only generated for modules with a term at p.adj < 0.05)
+- `pd_network/enrichr_table.csv`, `enrichr_plots/*.pdf` — same, PD condition
+
+## Enrichment reinforces the CACNA1D finding
+
+CACNA1D's PD-condition module (blue, kME=0.54) is enriched almost entirely for **synaptic
+signaling and calcium channel regulation** — directly on-topic for a voltage-gated calcium
+channel gene:
+
+| Term | Adjusted p-value |
+|---|---|
+| Regulation Of Trans-Synaptic Signaling | 6.1×10⁻⁴ |
+| Modulation Of Chemical Synaptic Transmission | 9.0×10⁻⁴ |
+| Regulation Of Cation Channel Activity | 1.7×10⁻³ |
+| **Regulation Of Voltage-Gated Calcium Channel Activity** | 1.7×10⁻³ |
+| Regulation Of Calcium Ion Transmembrane Transporter Activity | 2.0×10⁻³ |
+| Regulation Of Synapse Assembly | 9.9×10⁻³ |
+
+By contrast, CACNA1D's control-condition module (turquoise, kME=0.15) shows only weak,
+non-specific enrichment (actin filament organization, lipid biosynthesis — all tied at the same
+borderline p.adj≈0.028), consistent with CACNA1D being only loosely tied to that module.
+
+Together with the module-membership shift itself, this suggests CACNA1D becomes tightly
+co-regulated with a coherent synaptic calcium-signaling program specifically in PD dopaminergic
+neurons — exactly the kind of shift the (incomplete) formal preservation test was designed to
+quantify statistically.
+
 ## What this is and isn't
 
 This is **two independently-built networks**, not a formal preservation test. It shows each

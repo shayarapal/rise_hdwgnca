@@ -107,4 +107,26 @@ p_scores <- wrap_plots(plot_list_scores, ncol = 4)
 ggsave(file.path(p$out_dir, "module_scores_umap.png"), plot = p_scores, width = 16, height = 12, dpi = 150)
 log_mem("after ModuleFeaturePlot(PD, scores)")
 
+dbs <- c("GO_Biological_Process_2023", "KEGG_2021_Human")
+obj <- RunEnrichr(
+  obj,
+  dbs        = dbs,
+  max_genes  = 100,
+  wgcna_name = p$wgcna_name
+)
+log_mem("after RunEnrichr(PD)")
+
+enrich_df <- GetEnrichrTable(obj, wgcna_name = p$wgcna_name)
+write.csv(enrich_df, file.path(p$out_dir, "enrichr_table.csv"), row.names = FALSE)
+
+EnrichrBarPlot(
+  obj,
+  outdir     = file.path(p$out_dir, "enrichr_plots"),
+  n_terms    = 10,
+  plot_size  = c(5, 7),
+  logscale   = TRUE,
+  wgcna_name = p$wgcna_name
+)
+log_mem("after EnrichrBarPlot(PD)")
+
 cat("DIAGNOSTIC COMPLETE\n")
