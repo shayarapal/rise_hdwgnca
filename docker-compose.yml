@@ -13,7 +13,7 @@ services:
     environment:
       # WGCNA threads PER future worker (entrypoint.R runs 2), so this is a multiplier:
       # 2 x 4 = up to 8 extra R processes. Set to 1 to disable WGCNA's own parallelism.
-      WGCNA_THREADS: "4"
+      WGCNA_THREADS: "1"
     restart: unless-stopped
 
   backend:

@@ -40,6 +40,77 @@ patch_seuratdisk <- function() {
   invisible(TRUE)
 }
 
+# hdWGCNA::SelectNetworkGenes (gene_select="fraction" path) binarizes the counts matrix
+# with `cur[cur > 0] <- 1` on a dgCMatrix chunk. Boolean-matrix-indexed assignment on a
+# sparse Matrix is a well-documented Matrix-package memory trap: it does not reliably stay
+# sparse internally, and on a chunk sized by ncol(expr_mat) (cells) rather than genes this
+# balloons to tens of GB for cell counts in the tens of thousands, killing the process
+# before SetupForWGCNA's caller ever gets a chance to run. `cur@x[cur@x > 0] <- 1` sets the
+# same stored (nonzero) values to 1 directly, producing an identical binarized matrix
+# without ever leaving sparse representation. Must run before hdWGCNA's namespace is used.
+patch_hdwgcna_select_network_genes <- function() {
+  fixed <- function(seurat_obj, gene_select = "variable", fraction = 0.05,
+                     group.by = NULL, gene_list = NULL, assay = NULL, wgcna_name = NULL) {
+    if (is.null(wgcna_name)) wgcna_name <- seurat_obj@misc$active_wgcna
+    if (!(gene_select %in% c("variable", "fraction", "all", "custom"))) {
+      stop(paste0("Invalid selection gene_select: ", gene_select,
+                  ". Valid gene_selects are variable, fraction, all, or custom."))
+    }
+    if (is.null(assay)) assay <- Seurat::DefaultAssay(seurat_obj)
+    expr_mat <- if (hdWGCNA:::CheckSeurat5()) {
+      SeuratObject::LayerData(seurat_obj, layer = "counts", assay = assay)
+    } else {
+      Seurat::GetAssayData(seurat_obj, slot = "counts", assay = assay)
+    }
+
+    if (gene_select == "fraction") {
+      n_chunks <- ceiling(ncol(expr_mat) / 10000)
+      chunks <- if (n_chunks == 1) factor(rep(1), levels = 1) else cut(1:nrow(expr_mat), n_chunks)
+
+      expr_mat <- do.call(rbind, lapply(levels(chunks), function(x) {
+        cur <- expr_mat[chunks == x, ]
+        cur@x[cur@x > 0] <- 1   # fixed: stays sparse, same result as cur[cur > 0] <- 1
+        cur
+      }))
+
+      if (!is.null(group.by)) {
+        groups <- unique(seurat_obj@meta.data[[group.by]])
+        group_gene_list <- list()
+        for (cur_group in groups) {
+          cur_expr <- expr_mat[, seurat_obj@meta.data[[group.by]] == cur_group]
+          gene_filter <- Matrix::rowSums(cur_expr) >= round(fraction * ncol(cur_expr))
+          group_gene_list[[cur_group]] <- rownames(seurat_obj)[gene_filter]
+        }
+        gene_list <- unique(unlist(group_gene_list))
+      } else {
+        gene_filter <- Matrix::rowSums(expr_mat) >= round(fraction * ncol(seurat_obj))
+        gene_list <- rownames(seurat_obj)[gene_filter]
+      }
+    } else if (gene_select == "variable") {
+      gene_list <- Seurat::VariableFeatures(seurat_obj)
+    } else if (gene_select == "all") {
+      gene_list <- rownames(seurat_obj)
+    } else if (gene_select == "custom") {
+      gene_list <- unique(gene_list)
+      if (!all(gene_list %in% rownames(seurat_obj))) {
+        stop("Some selected features are not found in rownames(seurat_obj).")
+      }
+      if (!is.null(gene_list) && !is.character(gene_list)) {
+        stop("Invalid type for gene_list, must be a character vector.")
+      }
+    }
+
+    if (length(gene_list) == 0) stop("No genes found")
+    if (length(gene_list) <= 100) {
+      warning(paste0("Very few genes selected (", length(gene_list),
+                     "), perhaps use a different method to select genes."))
+    }
+    hdWGCNA:::SetWGCNAGenes(seurat_obj, gene_list, wgcna_name)
+  }
+  assignInNamespace("SelectNetworkGenes", fixed, ns = "hdWGCNA")
+  invisible(TRUE)
+}
+
 # Dispatch on extension. Without the guards below, handing this a non-HDF5 file (an .R
 # script, an .rds) drops straight into the HDF5 C library, which reports "unable to read
 # superblock" across ~20 lines of H5F.c stack instead of saying "that isn't an h5Seurat".

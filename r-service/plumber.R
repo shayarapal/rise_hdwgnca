@@ -197,6 +197,7 @@ pipeline_libs <- function() {
   library(patchwork)
   library(igraph)
   library(enrichR)
+  patch_hdwgcna_select_network_genes()
   wgcna_threads()
 }
 
@@ -527,8 +528,7 @@ run_module_preservation <- function(p) {
   require_columns(obj, c(p$condition_col, p$cell_type_col, unlist(p$group_by)))
   write_donor_counts(obj, p)
 
-  ref   <- subset_condition(obj, p$condition_col, p$ref_group)
-  query <- subset_condition(obj, p$condition_col, p$query_group)
+  ref <- subset_condition(obj, p$condition_col, p$ref_group)
   rm(obj); gc()
 
   # Reference: the same network /analyze builds, restricted to one condition.
@@ -536,6 +536,10 @@ run_module_preservation <- function(p) {
   ref <- test_soft_powers(ref, p)
   ref <- build_network(ref, p)
   write_module_outputs(ref, p)
+
+  # query isn't touched until here, so it is loaded fresh now rather than kept in memory
+  # (as a second full Seurat object) throughout ref's setup/network-construction above.
+  query <- subset_condition(load_seurat(p$h5seurat_path), p$condition_col, p$query_group)
 
   # ProjectModules runs SetupForWGCNA and ModuleEigengenes on the query internally, and
   # leaves "projected" as its active hdWGCNA experiment — hence no wgcna_name on the query
