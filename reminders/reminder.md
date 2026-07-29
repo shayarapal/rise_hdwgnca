@@ -30,16 +30,39 @@ question directly, more so than a PD-vs-control comparison within SNc alone.
 comparison. A new dataset containing VTA (ideally VTA + SNc from the same study, or at least a
 comparable VTA dataset with the same cell-type-defining markers) is required.
 
+## Species decision: no human VTA scRNA-seq dataset found
+
+User couldn't find a human single-cell VTA dataset. Decision: use a rodent (mouse) dataset
+instead, but ONLY one that profiles **both SNc and VTA in the same study** — directly
+cross-comparing rat/mouse VTA against the existing human SNc data (GSE243639) would confound
+species differences with region differences and was rejected as not valid for a primary claim.
+
+## Candidate dataset found and verified: GSE233866
+
+"Transcriptomic atlas of midbrain dopamine neurons uncovers differential vulnerability in a
+Parkinsonism lesion model" — Yaghmaeian Salmani et al., Karolinska Institute
+(https://elifesciences.org/articles/89482).
+
+- Mouse, ~70,000 midbrain nuclei, snRNA-seq
+- Explicitly distinguishes SNc vs VTA mDA neurons via Sox6 (SNc) / Calb1 (VTA) — near-mutually-
+  exclusive expression defines the split in this dataset
+- Also includes a 6-OHDA lesion model (untreated vs. lesioned), so this single dataset could
+  later support a disease-relevant comparison too, without needing a third dataset
+- Supplementary files on GEO: `GSE233866_untreated_counts.csv.gz` (31.5MB — the baseline SNc/VTA
+  atlas, what to start with) and `GSE233866_lesion_intact_counts.csv.gz` (282.7MB — the 6-OHDA
+  experiment, for later)
+
 ## Next steps (not yet started)
 
-1. Identify a public dataset with VTA dopaminergic neuron snRNA-seq/scRNA-seq (GEO or similar).
-   Likely markers for distinguishing VTA vs SNc DA neurons: SOX6 / ALDH1A1 (SNc-enriched) vs.
-   OTX2 / CALB1 / VIP (VTA-enriched, per literature — verify against the chosen dataset's own
-   marker annotations rather than assuming).
-2. Run the same pipeline (build network → dendrogram → kME → correlogram → hME/UCell UMAP →
-   Enrichr) exclusively on VTA neurons from that dataset.
-3. Compare CACNA1D's module membership, kME, and enrichment between the VTA network and the
-   existing SNc network(s).
-4. Only after that: revisit whether the PD-vs-control angle (within SNc, and eventually within
-   VTA) is still worth pursuing, and whether DME (differential module eigengene) analysis is the
-   right tool for it.
+1. Download and stage GSE233866 (`untreated_counts.csv.gz` first).
+2. Build Seurat object, using this dataset's own Sox6/Calb1-based (or however it's annotated)
+   SNc/VTA split rather than assuming a marker set from a different study.
+3. Run the same pipeline (build network → dendrogram → kME → correlogram → hME/UCell UMAP →
+   Enrichr) separately on the SNc and VTA populations within this mouse dataset.
+4. Compare CACNA1D's module membership, kME, and enrichment between mouse SNc and mouse VTA.
+   Note as a caveat throughout: this is a same-species (mouse) finding — translating it back to
+   the human SNc results already in `analysis_results/` is a separate, later inference, not
+   something to claim directly.
+5. Only after that: revisit whether the PD-vs-control angle (within SNc, and eventually within
+   VTA, now possible via this dataset's own 6-OHDA lesion arm) is still worth pursuing, and
+   whether DME (differential module eigengene) analysis is the right tool for it.
