@@ -140,7 +140,7 @@ VTA specifically while neurodegeneration is happening — the signal most direct
 region-selective treatment target.
 
 **`lesion_model/vta_lesioned_network/`** (qualitative, mirrors §1/§2's separately-built
-networks): CACNA1D lands in module blue, kME=0.333, 1,720 cells, 4.14GB peak.
+networks): CACNA1D lands in module blue, kME=0.283, 1,720 cells, 4.14GB peak.
 
 **`lesion_model/snc_vs_vta_combined_dme_lesioned/`** (formal DME): one combined network pooling
 SNc-lesioned (2,291 cells) + VTA-lesioned (1,720 cells) = 4,011 cells, 4.12GB peak. CACNA1D's
