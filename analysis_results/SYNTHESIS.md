@@ -1,6 +1,6 @@
 # Synthesis: What This Body of Work Shows, and How to Use It
 
-Six analyses across two species and two disease models, all built around one question: **is
+Seven analyses across two species and two disease models, all built around one question: **is
 CACNA1D's co-expression network disrupted in Parkinson's disease, in a way that points to
 additional drug targets beyond isradipine (which failed STEADY-PD III)?**
 
@@ -8,7 +8,7 @@ This document is the map: what each study actually shows, its strength of eviden
 belongs in a paper. Read the individual `README.md` in each subfolder for full detail — this is
 the cross-study synthesis.
 
-## The six analyses at a glance
+## The seven analyses at a glance
 
 | # | Study | Comparison | Evidence type | CACNA1D's module | Statistically significant? |
 |---|---|---|---|---|---|
@@ -18,6 +18,16 @@ the cross-study synthesis.
 | 4 | Mouse GSE233866, healthy | SNc vs VTA (formal preservation test) | **Formal statistical test** | turquoise, **Zsummary=20.4 (strongly preserved)** | Yes — module structure holds across regions |
 | 5 | Mouse GSE233866, 6-OHDA | SNc lesioned vs intact (2 separate networks) | Qualitative | blue (intact, kME=0.35) → brown (lesioned, kME=0.40) | Not a formal test — see #6 |
 | 6 | Mouse GSE233866, 6-OHDA | SNc lesioned vs intact (1 combined network) | **Formal DME test** | blue, kME=0.40 | **Yes — extremely** (p.adj=6.1×10⁻²⁶⁹) |
+| 7 | Mouse GSE233866, 6-OHDA | SNc vs VTA, **within lesioned cells only** (1 combined network) | **Formal DME test** | blue, kME=0.32 | **Yes — extremely, and highly specific** (p.adj=4.5×10⁻¹²³, higher in SNc) |
+
+Study #7 answers a different question than #3/#4 or #5/#6: not baseline regional structure, and
+not disease-vs-healthy within one region, but **what's specifically more active in the vulnerable
+region (SNc) than the resistant one (VTA) while neurodegeneration is actually happening** — the
+comparison most directly relevant to a region-selective treatment target. 11 of 12 modules differ
+significantly here (expected — SNc and VTA are fundamentally different populations), but
+CACNA1D's own module is among the strongest signals in the whole table, and specifically more
+active in SNc — arguably the single most direct result this project has produced for "why SNc
+specifically."
 
 ## What each pair (qualitative + formal) actually means
 
@@ -80,6 +90,15 @@ perturbation is real and detectable when the insult is large enough. Report the 
 difference vs. human openly (acute vs. chronic) rather than letting a reader assume they should
 match.
 
+**Results — region-selective signal during neurodegeneration (the sharpest single finding)** —
+study #7. This is the comparison most directly relevant to a region-selective treatment: within
+lesioned tissue only, CACNA1D's module is one of the most significant differences in the entire
+SNc-vs-VTA table (p.adj=4.5×10⁻¹²³) and is specifically *more active in SNc*, the region that's
+actually dying. Lead with this alongside #6 as the strongest quantitative results in the whole
+project — but note the caveat that 11 of 12 modules differ here, since SNc and VTA are different
+populations to begin with, so frame CACNA1D's result as "notably strong even against that broad
+background," not as a uniquely surprising isolated hit.
+
 **Discussion — candidate targets beyond isradipine** — synthesize across all of it: propose
 UCHL1, SACS, AKAP9, HSP90AA1/AB1, PDE4D, PRKG1 (this last pair from the earlier informal
 PD-network hub list) as a candidate multi-gene network for follow-up, explicitly noting PDE4D
@@ -99,10 +118,11 @@ substitute for direct human validation of any proposed target.
 
 ## File map
 
-- `control_network/`, `pd_network/` — study #1
-- `human_snc_dme/` — study #2
-- `mouse_GSE233866/snc_network/`, `mouse_GSE233866/vta_network/` — study #3
-- `mouse_GSE233866/snc_vs_vta_preservation/` — study #4
-- `mouse_GSE233866/snc_lesioned_network/`, `mouse_GSE233866/snc_intact_network/` — study #5
-- `mouse_GSE233866/snc_dme/` — study #6
+- `human_GSE243639/pd_vs_control_separate_networks/{control_network,pd_network}/` — study #1
+- `human_GSE243639/pd_vs_control_combined_dme/` — study #2
+- `mouse_GSE233866/healthy_baseline/{snc_network,vta_network}/` — study #3
+- `mouse_GSE233866/healthy_baseline/snc_vs_vta_preservation/` — study #4
+- `mouse_GSE233866/lesion_model/{snc_lesioned_network,snc_intact_network}/` — study #5
+- `mouse_GSE233866/lesion_model/lesioned_vs_intact_combined_dme_snc/` — study #6
+- `mouse_GSE233866/lesion_model/vta_lesioned_network/` + `snc_vs_vta_combined_dme_lesioned/` — study #7
 - `reminders/reminder.md` — running project log of decisions and pivots made along the way

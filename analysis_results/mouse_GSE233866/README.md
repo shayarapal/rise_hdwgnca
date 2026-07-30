@@ -1,16 +1,32 @@
-# CACNA1D Co-expression Networks — Mouse SNc vs. VTA (GSE233866)
+# Mouse GSE233866 — CACNA1D Co-expression, SNc vs. VTA and Healthy vs. Lesioned
 
-Same-species, same-study comparison (unlike the human control-vs-PD analysis one level up):
-GSE233866 (Yaghmaeian Salmani et al., Karolinska Institute) profiles both SNc and VTA mouse
-dopaminergic neurons together — 6 untreated DatCre;TRAP mice, ages P90/P530. SNc/VTA labels are
-not provided by the dataset; they were derived here via Sox6 (SNc) / Calb1 (VTA) marker scoring,
-mirroring the source paper's own method (see `DATA_GSE233866/build_seurat_GSE233866.R`).
+GSE233866 (Yaghmaeian Salmani et al., Karolinska Institute) profiles mouse midbrain dopaminergic
+neurons across two arms: an **untreated** baseline cohort (6 animals, no disease) and a
+**6-OHDA lesion** cohort (a different set of 6 animals, each contributing both a lesioned and an
+intact/contralateral hemisphere). SNc/VTA labels are not provided by the dataset for either arm —
+they're derived here via Sox6 (SNc) / Calb1 (VTA) marker scoring, mirroring the source paper's
+own method (see `DATA_GSE233866/build_seurat_GSE233866.R` / `build_seurat_lesion_intact.R`).
 
-Population sizes: **2,226 SNc cells, 832 VTA cells** (pooled across all 6 animals), out of 4,514
-total dopaminergic neurons identified via Th/Slc6a3/Ddc/Slc18a2 scoring. Soft power = 5 for both
-(independently determined per network, not assumed from the human dataset).
+Three sub-analyses, each answering a different question. See `analysis_results/SYNTHESIS.md`
+for the full cross-study picture.
 
-## Result: CACNA1D's module differs by region, but both connections are weak
+1. **`healthy_baseline/`** — SNc vs. VTA, no disease. *Are the regions structurally different at
+   baseline?*
+2. **`lesion_model/*_network` + `lesioned_vs_intact_combined_dme_snc/`** — lesioned vs. intact,
+   within SNc. *Does disease change this region's network?*
+3. **`lesion_model/vta_lesioned_network/` + `snc_vs_vta_combined_dme_lesioned/`** — SNc vs. VTA,
+   within the lesioned state only. *What's specifically active in the vulnerable region during
+   neurodegeneration itself* — the most direct analog of a region-selective treatment target.
+
+---
+
+## 1. `healthy_baseline/` — SNc vs. VTA, no disease
+
+Population sizes: **2,226 SNc cells, 832 VTA cells** (pooled across all 6 untreated animals), out
+of 4,514 total dopaminergic neurons identified via Th/Slc6a3/Ddc/Slc18a2 scoring. Soft power = 5
+for both (independently determined per network, not assumed from the human dataset).
+
+### Result: CACNA1D's module differs by region, but both connections are weak
 
 | Region | Module | kME (own module) | Module size (genes) | # modules total |
 |---|---|---|---|---|
@@ -18,40 +34,21 @@ total dopaminergic neurons identified via Th/Slc6a3/Ddc/Slc18a2 scoring. Soft po
 | VTA | brown | 0.094 (weak) | 316 | 39 |
 
 Unlike the human PD-vs-control result (kME 0.15 → 0.54), CACNA1D's module membership is weak in
-**both** mouse regions. This likely reflects the much smaller cell counts here (thousands, not
-tens of thousands) making per-gene kME estimates noisier — treat the SNc-vs-VTA module identity
-shift itself as informative, but don't read strong quantitative weight into these particular kME
-values.
+**both** mouse regions — likely reflecting the much smaller cell counts here making per-gene kME
+estimates noisier. Treat the SNc-vs-VTA module identity shift as informative, but don't read
+strong quantitative weight into these particular kME values. Similarly, the stark module-count
+difference (SNc: 9 vs. VTA: 39, many under 100 genes) is likely a sample-size artifact (832 vs.
+2,226 cells), not a confirmed biological difference in network organization.
 
-The stark difference in module count (SNc: 9 modules vs. VTA: 39, many under 100 genes) is
-likely driven by VTA's smaller sample size (832 vs. 2,226 cells) rather than a confirmed
-biological difference in network organization — worth re-checking if a larger VTA dataset
-becomes available.
+**Enrichment:** SNc's turquoise module hits "Dopaminergic synapse" (KEGG, p.adj=2.8×10⁻⁴)
+directly; VTA's brown module hits "calcium ion transmembrane import into cytosol" (GO,
+p.adj=7.8×10⁻³), on-topic for a calcium channel gene but a weaker signal.
 
-## Enrichment
+### Formal preservation test (`snc_vs_vta_preservation/`, SNc as reference, 200 permutations)
 
-- **SNc turquoise** (CACNA1D's module): axon guidance, synaptic transmission, and — notably —
-  **"Dopaminergic synapse"** (KEGG, p.adj=2.8×10⁻⁴), a direct hit for this cell type.
-- **VTA brown** (CACNA1D's module): synaptic transmission and **calcium ion transmembrane
-  import into cytosol** (GO, p.adj=7.8×10⁻³) — directly on-topic for a calcium channel gene,
-  though a weaker signal than the SNc dopaminergic-synapse hit.
-
-## Files
-
-`snc_network/` and `vta_network/` each contain: `dendrogram.png`, `network_plot.png` (kME plot),
-`module_eigengene_umap.png`, `module_scores_umap.png` (UCell), `module_correlogram.png`/`.pdf`,
-`module_by_animal_heatmap.png` (mean harmonized module eigengene per module per animal, z-scored
-per module — a quick way to spot animal-to-animal consistency or outliers within a region),
-`modules.csv`, `enrichr_table.csv` + `enrichr_plots/*.pdf`, and soft-power diagnostics. All PNGs
-are rendered large (2000-2800px) given VTA alone resolves to 39 modules.
-
-## Formal preservation test (SNc as reference, VTA as query, 200 permutations)
-
-Ran to completion easily on this dataset (peaked at 3.88GB, ~12 minutes) — the memory ceiling
-that blocked this same test on the human data was never a factor here.
-
-By WGCNA convention (Langfelder et al. 2011): Zsummary > 10 = strongly preserved, 2–10 =
-weak/moderate, < 2 = not preserved.
+Ran to completion easily (peaked at 3.88GB, ~12 minutes) — the memory ceiling that blocked this
+same test on the human data was never a factor here. By WGCNA convention (Langfelder et al.
+2011): Zsummary > 10 = strongly preserved, 2–10 = weak/moderate, < 2 = not preserved.
 
 | Module | Zsummary (preservation) | Rank (of 8 real modules) |
 |---|---|---|
@@ -64,41 +61,39 @@ weak/moderate, < 2 = not preserved.
 | black | 7.9 | 7 |
 | pink | 7.6 | 8 |
 
-(`gold` and `grey` are WGCNA's internal random-control and unassigned-gene bins respectively —
-not real modules, excluded from ranking. `moduleSize.obs` in `preservation.csv` is capped at
-1000 genes for the largest modules — a standard WGCNA computational-tractability limit for the
-permutation statistics, not each module's true gene count.)
+(`gold`/`grey` are WGCNA's internal random-control/unassigned-gene bins, excluded from ranking.
+`moduleSize.obs` in `preservation.csv` is capped at 1000 genes — a standard WGCNA
+computational-tractability limit, not each module's true size.)
 
 **CACNA1D's module (turquoise) is strongly preserved (Zsummary=20.4), ranking 3rd of 8.** This
-refines, rather than contradicts, the qualitative finding above: even though CACNA1D was
-independently assigned to a *different-colored* module when VTA alone was analyzed (brown), the
-broader gene community it belongs to in SNc clearly still holds together as a coherent
-co-expression unit within VTA data. The module-identity shift likely reflects CACNA1D's own
-*relative* connectivity/position shifting within an otherwise-stable neighborhood, rather than
-that neighborhood itself dissolving between regions.
+refines the qualitative finding above: even though CACNA1D gets a *different-colored* label when
+VTA is analyzed independently (brown), the broader gene community it belongs to in SNc clearly
+still holds together within VTA data — the module-identity shift likely reflects CACNA1D's own
+relative connectivity shifting, not that neighborhood dissolving between regions.
 
-All 6 animals cleared the `min_cells=100` metacell threshold in both conditions, though VTA's
-smallest sample (s450, 102 cells) was close to that floor — worth keeping in mind if this result
-is revisited with more data.
+All 6 animals cleared the `min_cells=100` metacell threshold, though VTA's smallest sample (s450,
+102 cells) was close to that floor.
 
-Files: `snc_vs_vta_preservation/preservation.csv`, `preservation_plot.png`, plus the reference
-(SNc) network's own `modules.csv`, `network_plot.png`, soft-power diagnostics, and
-`donor_counts.csv`.
+**Files** — `healthy_baseline/snc_network/`, `vta_network/`: `dendrogram.png`, `network_plot.png`
+(kME plot), `module_eigengene_umap.png`, `module_scores_umap.png` (UCell),
+`module_correlogram.png`/`.pdf`, `module_by_animal_heatmap.png` (mean hME per module per animal,
+z-scored — spots animal outliers), `modules.csv`, `enrichr_table.csv` + `enrichr_plots/*.pdf`,
+soft-power diagnostics. `healthy_baseline/snc_vs_vta_preservation/`: `preservation.csv`,
+`preservation_plot.png`, `donor_counts.csv`, plus the reference (SNc) network's own outputs.
 
-## Lesioned vs. Intact — the mouse PD-model comparison (disease-relevant)
+---
 
-Everything above uses the **untreated** (healthy baseline) arm of GSE233866 — no disease at all,
-purely regional structure. This section uses the study's other arm: 6-OHDA-lesioned vs. the
-contralateral intact hemisphere, a standard chemical PD model, in the same 6 animals (paired
-design: each animal contributes both conditions). This is the actual mouse disease-vs-healthy
-comparison, directly analogous to the human PD-vs-control axis.
+## 2. Lesioned vs. intact within SNc — the mouse PD-model comparison
+
+Uses the study's disease arm: 6-OHDA-lesioned vs. contralateral intact hemisphere, same 6
+animals (paired design) — the mouse analog of the human PD-vs-control axis.
 
 Sanity check before any network analysis: 6-OHDA selectively kills dopaminergic neurons, and the
 data confirms it — DA neuron counts dropped from 19,662 (intact) to 6,243 (lesioned) overall, and
 **SNc lost proportionally more than VTA** (SNc: 8,637→2,291, 3.8x; VTA: 4,426→1,720, 2.6x),
 matching this paper's whole premise of differential regional vulnerability.
 
-### Two independently-built networks: SNc lesioned vs. SNc intact
+### Two independently-built networks (`snc_intact_network/`, `snc_lesioned_network/`)
 
 | Condition | n cells | Module | kME (own module) | Peak RAM |
 |---|---|---|---|---|
@@ -106,17 +101,12 @@ matching this paper's whole premise of differential regional vulnerability.
 | Lesioned | 2,291 | brown | 0.398 | 3.82GB |
 
 CACNA1D's connectivity increases modestly under lesioning (0.346→0.398) — same *direction* as
-the human PD result, though a smaller shift. Enrichment is similar between the two (axon
-guidance, synaptic transmission, cell adhesion) — less differentiated than the human data, which
-showed a specific calcium-channel-signaling shift. Files: `snc_intact_network/`,
-`snc_lesioned_network/` (same file set as the healthy `snc_network/`/`vta_network/` folders).
+the human PD result, though smaller. Enrichment is similar between the two (axon guidance,
+synaptic transmission, cell adhesion) — less differentiated than the human data.
 
-### Formal DME test: lesioned vs. intact, one combined SNc network
+### Formal DME test (`lesioned_vs_intact_combined_dme_snc/`)
 
-As with the human data, two independently-built networks aren't module-for-module comparable —
-`snc_dme/` instead builds ONE combined network (both conditions pooled, 10,928 cells, 7.67GB
-peak) and runs `FindDMEs` within it.
-
+One combined network (both conditions pooled, 10,928 cells, 7.67GB peak), then `FindDMEs`.
 CACNA1D's module here: **blue, kME=0.40**.
 
 | Module | avg_log2FC | p.adj | Direction |
@@ -130,27 +120,68 @@ CACNA1D's module here: **blue, kME=0.40**.
 | green | +0.75 | 1.0 (n.s.) | no change |
 
 **CACNA1D's module is massively downregulated after lesioning** (p.adj ≈ 6×10⁻²⁶⁹) — far more
-statistically extreme than the equivalent human PD-vs-control DME result (see
-`analysis_results/human_snc_dme/`, where CACNA1D's module does NOT reach significance). Combined
-with the kME increase above, this paints a coherent picture: CACNA1D's broader co-expression
-program is suppressed in surviving lesioned neurons, but CACNA1D itself becomes *relatively* more
-central to whatever remains of that shrinking program. Read as a hypothesis worth stating, not an
-established mechanism — the top-level synthesis doc has the full cross-study interpretation.
+statistically extreme than the equivalent human DME result (`human_GSE243639/
+pd_vs_control_combined_dme/`, where CACNA1D's module does NOT reach significance). Combined with
+the kME increase above: CACNA1D's broader co-expression program is suppressed in surviving
+lesioned neurons, but CACNA1D itself becomes *relatively* more central to whatever remains of
+that shrinking program — a hypothesis worth stating, not an established mechanism.
 
-The brown module's log2FC is numerically unstable (large magnitude, not a real fold-change) for
-the same reason noted elsewhere: module eigengenes can be negative/near-zero. Trust the p-value,
-not that number.
+The brown module's log2FC is numerically unstable (module eigengenes can be negative/near-zero) —
+trust the p-value, not that magnitude. Same caveat applies throughout every DME table in this
+project.
 
-Files: `snc_dme/dendrogram.png`, `network_plot.png`, `modules.csv`, `dme_results.csv`,
-`dme_volcano.png`, `dme_lollipop.png`, soft-power diagnostics.
+---
 
-## Caveats
+## 3. SNc vs. VTA, within the lesioned state — what's active in the vulnerable region *during* disease
 
-- Sox6/Calb1-only cells were left unlabeled (1,456 of 4,514 DA neurons) rather than forced into
-  a region — a stricter or looser labeling rule would shift these population sizes.
+The most disease-and-region-specific comparison: not baseline regional structure (§1), not
+disease-vs-healthy within one region (§2), but which genes/modules are more active in SNc than
+VTA specifically while neurodegeneration is happening — the signal most directly relevant to a
+region-selective treatment target.
+
+**`lesion_model/vta_lesioned_network/`** (qualitative, mirrors §1/§2's separately-built
+networks): CACNA1D lands in module blue, kME=0.333, 1,720 cells, 4.14GB peak.
+
+**`lesion_model/snc_vs_vta_combined_dme_lesioned/`** (formal DME): one combined network pooling
+SNc-lesioned (2,291 cells) + VTA-lesioned (1,720 cells) = 4,011 cells, 4.12GB peak. CACNA1D's
+module here: **blue, kME=0.32**.
+
+`FindDMEs(barcodes1=SNc, barcodes2=VTA)` — positive log2FC means higher in SNc:
+
+| Module | avg_log2FC | p.adj | Direction |
+|---|---|---|---|
+| greenyellow | −5.34 | ~0 | higher in VTA |
+| turquoise | −6.70 | 7.2×10⁻²⁸⁸ | higher in VTA |
+| tan | +4.70 | 1.1×10⁻²⁷¹ | higher in SNc |
+| magenta | +6.83 | 3.4×10⁻¹⁴² | higher in SNc |
+| **blue (CACNA1D)** | **+13.34** | **4.5×10⁻¹²³** | **higher in SNc, extremely significant** |
+| pink | +5.41 | 2.0×10⁻¹¹⁹ | higher in SNc |
+| green | +4.45 | 1.0×10⁻⁵¹ | higher in SNc |
+| purple | −0.90 | 4.0×10⁻³² | higher in VTA |
+| black | −1.36 | 3.4×10⁻³⁰ | higher in VTA |
+| yellow | +12.78 | 8.8×10⁻²⁵ | higher in SNc |
+| red | +0.28 | 1.5×10⁻¹⁷ | higher in VTA |
+| brown | −9.43 | 0.068 (n.s.) | — |
+
+**11 of 12 modules differ significantly between SNc and VTA during lesioning** — expected, since
+these are fundamentally different neuron populations, not just disease-state variants of the
+same one. What matters is that **CACNA1D's own module is among the strongest signals in the
+entire table** (p.adj=4.5×10⁻¹²³) and is specifically *more active in SNc than VTA* during the
+neurodegenerative process — the most direct answer this project has produced to "what's driving
+SNc's selective vulnerability while it's actually happening." As with every DME table here,
+treat the log2FC magnitudes as directional evidence, not literal fold-changes (module eigengenes
+can be negative/near-zero, making that math numerically unstable) — the p-values are what to
+trust.
+
+---
+
+## Caveats (apply throughout this folder)
+
+- Sox6/Calb1-only cells were left unlabeled rather than forced into a region (1,456 of 4,514 DA
+  neurons in the untreated arm) — a stricter or looser labeling rule would shift population sizes.
 - Enrichr's `GO_Biological_Process_2023` / `KEGG_2021_Human` libraries are queried directly with
-  mouse gene symbols (not converted to human orthologs first); matching is generally
-  case-insensitive in practice but this hasn't been independently verified for this run.
-- This is a mouse finding. Translating it back to the human SNc results in
-  `analysis_results/{control_network,pd_network}/` is a separate, later inference — not
-  something to claim directly from this comparison.
+  mouse gene symbols (not converted to human orthologs); matching is generally case-insensitive
+  in practice but hasn't been independently verified for these specific runs.
+- These are mouse findings. Translating them back to the human results in
+  `analysis_results/human_GSE243639/` is a separate, later inference — not something to claim
+  directly from any comparison in this folder.

@@ -96,8 +96,46 @@ CACNA1D belongs to in SNc clearly holds together in VTA too, even though CACNA1D
 assigned a different-colored module (brown) when VTA was analyzed independently — likely a shift
 in CACNA1D's own relative connectivity within a stable neighborhood, not a dissolving module.
 
+## Done: formal DME tests, human + mouse lesion model (2026-07-29)
+
+Both use ONE combined network across conditions + `FindDMEs`, not the separately-built networks
+(different module definitions, not comparable module-for-module). Human (PD vs control, DA
+neurons pre-filtered first — 6.07GB vs the 25-34GB the original per-condition builds needed by
+processing all cell types): CACNA1D's own module does NOT reach significance (p.adj=1.0), but two
+others do (brown: SACS/AKAP9; blue: UCHL1 — an established PD gene — + HSP90AA1/AB1, NEFL/NEFM).
+Mouse (SNc lesioned vs intact): CACNA1D's own module IS extremely significant (p.adj=6.1e-269) —
+far more profound than human, consistent with an acute lesion producing a bigger signal than
+chronic disease. Full writeup: `analysis_results/SYNTHESIS.md` (new top-level cross-study doc).
+
+Also needed: `ggforestplot` (GitHub, NightingaleHealth/ggforestplot) added to Dockerfile —
+`PlotDMEsLollipop` needs it and crashes trying to auto-install itself without `devtools`.
+
+## Done: SNc vs VTA, within lesioned state only (2026-07-29)
+
+User's ask: not baseline region difference, not disease-vs-healthy within one region, but what's
+active in SNc vs VTA *specifically during* neurodegeneration — the most direct region-selective
+treatment signal. Built `vta_lesioned_network` (qualitative) + `snc_vs_vta_combined_dme_lesioned`
+(formal DME, SNc-lesioned vs VTA-lesioned pooled, 4,011 cells, 4.12GB peak).
+
+Result: 11 of 12 modules differ significantly (expected — SNc/VTA are different populations to
+begin with), but CACNA1D's own module (blue, kME=0.32) is among the strongest signals in the
+whole table (p.adj=4.5e-123) and is specifically *more active in SNc* — arguably the single
+sharpest result in the whole project for "why SNc specifically."
+
+## Done: reorganized analysis_results for clarity (2026-07-29)
+
+Old flat structure (`control_network/`, `pd_network/`, `human_snc_dme/` at top level;
+`mouse_GSE233866/{snc_network,vta_network,snc_dme,...}/` all flat) reorganized into:
+`human_GSE243639/{pd_vs_control_separate_networks,pd_vs_control_combined_dme}/` and
+`mouse_GSE233866/{healthy_baseline,lesion_model}/...`, with folder names describing what's
+inside rather than needing the README to explain it. New top-level `README.md` is a short index;
+`SYNTHESIS.md` remains the full cross-study synthesis. See `SYNTHESIS.md`'s file map for the
+complete current path list before assuming an old path still exists.
+
 ## Next steps (not yet started)
 
-1. Revisit whether the PD-vs-control angle (within SNc, and eventually within VTA, now possible
-   via this dataset's own 6-OHDA lesion arm) is still worth pursuing, and whether DME
-   (differential module eigengene) analysis is the right tool for it.
+1. Revisit whether the PD-vs-control angle within VTA specifically (using this dataset's
+   6-OHDA lesion arm) adds anything beyond what SNc already covers.
+2. Consider whether a larger VTA dataset would change the module-count asymmetry noted in
+   `mouse_GSE233866/README.md` (VTA fragments into far more, smaller modules than SNc, likely a
+   sample-size artifact rather than a real difference in network organization).
