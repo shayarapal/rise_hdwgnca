@@ -85,6 +85,65 @@ Files: `snc_vs_vta_preservation/preservation.csv`, `preservation_plot.png`, plus
 (SNc) network's own `modules.csv`, `network_plot.png`, soft-power diagnostics, and
 `donor_counts.csv`.
 
+## Lesioned vs. Intact — the mouse PD-model comparison (disease-relevant)
+
+Everything above uses the **untreated** (healthy baseline) arm of GSE233866 — no disease at all,
+purely regional structure. This section uses the study's other arm: 6-OHDA-lesioned vs. the
+contralateral intact hemisphere, a standard chemical PD model, in the same 6 animals (paired
+design: each animal contributes both conditions). This is the actual mouse disease-vs-healthy
+comparison, directly analogous to the human PD-vs-control axis.
+
+Sanity check before any network analysis: 6-OHDA selectively kills dopaminergic neurons, and the
+data confirms it — DA neuron counts dropped from 19,662 (intact) to 6,243 (lesioned) overall, and
+**SNc lost proportionally more than VTA** (SNc: 8,637→2,291, 3.8x; VTA: 4,426→1,720, 2.6x),
+matching this paper's whole premise of differential regional vulnerability.
+
+### Two independently-built networks: SNc lesioned vs. SNc intact
+
+| Condition | n cells | Module | kME (own module) | Peak RAM |
+|---|---|---|---|---|
+| Intact | 8,637 | blue | 0.346 | 9.98GB |
+| Lesioned | 2,291 | brown | 0.398 | 3.82GB |
+
+CACNA1D's connectivity increases modestly under lesioning (0.346→0.398) — same *direction* as
+the human PD result, though a smaller shift. Enrichment is similar between the two (axon
+guidance, synaptic transmission, cell adhesion) — less differentiated than the human data, which
+showed a specific calcium-channel-signaling shift. Files: `snc_intact_network/`,
+`snc_lesioned_network/` (same file set as the healthy `snc_network/`/`vta_network/` folders).
+
+### Formal DME test: lesioned vs. intact, one combined SNc network
+
+As with the human data, two independently-built networks aren't module-for-module comparable —
+`snc_dme/` instead builds ONE combined network (both conditions pooled, 10,928 cells, 7.67GB
+peak) and runs `FindDMEs` within it.
+
+CACNA1D's module here: **blue, kME=0.40**.
+
+| Module | avg_log2FC | p.adj | Direction |
+|---|---|---|---|
+| yellow | +6.93 | ~0 | ↑↑ lesioned |
+| **blue (CACNA1D)** | **−1.66** | **6.1×10⁻²⁶⁹** | **↓ lesioned, extremely significant** |
+| red | −1.85 | 1.1×10⁻¹⁴¹ | ↓ lesioned |
+| brown | (unstable, see caveat) | 7.1×10⁻¹⁷ | ↓ lesioned |
+| turquoise | +1.82 | 2.1×10⁻¹⁶ | ↑ lesioned |
+| black | −2.79 | 2.2×10⁻⁴ | ↓ lesioned |
+| green | +0.75 | 1.0 (n.s.) | no change |
+
+**CACNA1D's module is massively downregulated after lesioning** (p.adj ≈ 6×10⁻²⁶⁹) — far more
+statistically extreme than the equivalent human PD-vs-control DME result (see
+`analysis_results/human_snc_dme/`, where CACNA1D's module does NOT reach significance). Combined
+with the kME increase above, this paints a coherent picture: CACNA1D's broader co-expression
+program is suppressed in surviving lesioned neurons, but CACNA1D itself becomes *relatively* more
+central to whatever remains of that shrinking program. Read as a hypothesis worth stating, not an
+established mechanism — the top-level synthesis doc has the full cross-study interpretation.
+
+The brown module's log2FC is numerically unstable (large magnitude, not a real fold-change) for
+the same reason noted elsewhere: module eigengenes can be negative/near-zero. Trust the p-value,
+not that number.
+
+Files: `snc_dme/dendrogram.png`, `network_plot.png`, `modules.csv`, `dme_results.csv`,
+`dme_volcano.png`, `dme_lollipop.png`, soft-power diagnostics.
+
 ## Caveats
 
 - Sox6/Calb1-only cells were left unlabeled (1,456 of 4,514 DA neurons) rather than forced into

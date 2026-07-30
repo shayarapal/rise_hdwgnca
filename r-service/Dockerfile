@@ -60,6 +60,11 @@ RUN Rscript -e "remotes::install_github('smorabit/hdWGCNA', ref='dev')"
 # R.utils -- data.table::fread() needs it to read .gz files directly.
 RUN Rscript -e "install.packages(c('harmony', 'R.utils'), repos='https://cloud.r-project.org')"
 
+# ggforestplot -- hdWGCNA's PlotDMEsLollipop loads this at call time and, if
+# missing, tries to auto-install it itself (which fails without devtools and
+# crashes the caller). Install it ahead of time instead.
+RUN Rscript -e "remotes::install_github('NightingaleHealth/ggforestplot')"
+
 # Build-time tripwire: install.packages() and remotes::install_github() only WARN on a failed
 # package and let the build exit 0 — so any missing runtime dependency ships silently and the
 # container crash-loops at startup. This loads EVERY package the service uses at runtime
