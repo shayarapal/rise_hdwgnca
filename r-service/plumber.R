@@ -43,7 +43,7 @@ require_job <- function(job_id, res) {
 }
 
 save_png <- function(plot_obj, path) {
-  png(path, width = 1200, height = 800, res = 150)
+  png(path, width = 2400, height = 1600, res = 200)
   print(plot_obj)
   dev.off()
 }

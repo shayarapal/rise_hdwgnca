@@ -59,7 +59,7 @@ obj <- ConstructNetwork(
 )
 log_mem("after ConstructNetwork(SNc)")
 
-png(file.path(p$out_dir, "dendrogram.png"), width = 1400, height = 800, res = 150)
+png(file.path(p$out_dir, "dendrogram.png"), width = 2400, height = 1400, res = 200)
 PlotDendrogram(obj, main = "Mouse SNc — Dopaminergic Neuron gene dendrogram", wgcna_name = p$wgcna_name)
 dev.off()
 
@@ -73,15 +73,20 @@ log_mem("after ModuleEigengenes+Connectivity(SNc)")
 write_module_outputs(obj, p)
 log_mem("after write_module_outputs(SNc)")
 
+# Image height scales with module count (SNc has few modules, VTA has many) so panels
+# stay legible regardless of how many modules a given network resolves to.
+panel_height <- function(n, ncol = 4, per_row_in = 3.6, min_in = 10) max(min_in, ceiling(n / ncol) * per_row_in)
+
 plot_list_hme <- ModuleFeaturePlot(obj, wgcna_name = p$wgcna_name, features = "hMEs", order_points = TRUE, reduction = "umap")
 if (length(plot_list_hme) > 0) {
-  ggsave(file.path(p$out_dir, "module_eigengene_umap.png"), plot = wrap_plots(plot_list_hme, ncol = 4), width = 16, height = 12, dpi = 150)
+  ggsave(file.path(p$out_dir, "module_eigengene_umap.png"), plot = wrap_plots(plot_list_hme, ncol = 4),
+         width = 20, height = panel_height(length(plot_list_hme)), dpi = 250, limitsize = FALSE)
 }
 
-pdf(file.path(p$out_dir, "module_correlogram.pdf"), width = 8, height = 7)
+pdf(file.path(p$out_dir, "module_correlogram.pdf"), width = 10, height = 9)
 ModuleCorrelogram(obj, wgcna_name = p$wgcna_name)
 dev.off()
-png(file.path(p$out_dir, "module_correlogram.png"), width = 1000, height = 875, res = 125)
+png(file.path(p$out_dir, "module_correlogram.png"), width = 2200, height = 1900, res = 200)
 ModuleCorrelogram(obj, wgcna_name = p$wgcna_name)
 dev.off()
 log_mem("after ModuleCorrelogram(SNc)")
@@ -89,9 +94,32 @@ log_mem("after ModuleCorrelogram(SNc)")
 obj <- ModuleExprScore(obj, n_genes = 25, method = "UCell", wgcna_name = p$wgcna_name)
 plot_list_scores <- ModuleFeaturePlot(obj, wgcna_name = p$wgcna_name, features = "scores", order_points = TRUE, ucell = TRUE, reduction = "umap")
 if (length(plot_list_scores) > 0) {
-  ggsave(file.path(p$out_dir, "module_scores_umap.png"), plot = wrap_plots(plot_list_scores, ncol = 4), width = 16, height = 12, dpi = 150)
+  ggsave(file.path(p$out_dir, "module_scores_umap.png"), plot = wrap_plots(plot_list_scores, ncol = 4),
+         width = 20, height = panel_height(length(plot_list_scores)), dpi = 250, limitsize = FALSE)
 }
 log_mem("after ModuleExprScore+FeaturePlot(SNc)")
+
+# Module-by-animal heatmap: mean harmonized module eigengene per module per animal,
+# z-scored per module (column) across animals so each module's own variability is
+# visible regardless of its baseline eigengene scale.
+hme_df <- as.data.frame(GetMEs(obj, harmonized = TRUE, wgcna_name = p$wgcna_name))
+hme_df$sample_id <- obj$sample_id[rownames(hme_df)]
+mod_cols <- setdiff(colnames(hme_df), "sample_id")
+hme_by_sample <- aggregate(hme_df[mod_cols], by = list(sample_id = hme_df$sample_id), FUN = mean)
+mat <- as.matrix(hme_by_sample[mod_cols])
+rownames(mat) <- hme_by_sample$sample_id
+mat_z <- scale(mat)
+df_long <- as.data.frame(as.table(mat_z))
+colnames(df_long) <- c("sample_id", "module", "z_hME")
+
+p_heatmap <- ggplot(df_long, aes(x = module, y = sample_id, fill = z_hME)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, name = "z(hME)") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Module", y = "Animal", title = "Mouse SNc — mean harmonized module eigengene per animal")
+ggsave(file.path(p$out_dir, "module_by_animal_heatmap.png"), plot = p_heatmap, width = 14, height = 6, dpi = 250)
+log_mem("after module_by_animal_heatmap(SNc)")
 
 dbs <- c("GO_Biological_Process_2023", "KEGG_2021_Human")
 obj <- RunEnrichr(obj, dbs = dbs, max_genes = 100, wgcna_name = p$wgcna_name)

@@ -40,7 +40,10 @@ becomes available.
 
 `snc_network/` and `vta_network/` each contain: `dendrogram.png`, `network_plot.png` (kME plot),
 `module_eigengene_umap.png`, `module_scores_umap.png` (UCell), `module_correlogram.png`/`.pdf`,
-`modules.csv`, `enrichr_table.csv` + `enrichr_plots/*.pdf`, and soft-power diagnostics.
+`module_by_animal_heatmap.png` (mean harmonized module eigengene per module per animal, z-scored
+per module — a quick way to spot animal-to-animal consistency or outliers within a region),
+`modules.csv`, `enrichr_table.csv` + `enrichr_plots/*.pdf`, and soft-power diagnostics. All PNGs
+are rendered large (2000-2800px) given VTA alone resolves to 39 modules.
 
 ## Formal preservation test (SNc as reference, VTA as query, 200 permutations)
 
