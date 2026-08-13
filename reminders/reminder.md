@@ -76,6 +76,11 @@ Both built via `DATA_GSE233866/build_snc_network.R` / `build_vta_network.R`. Ful
 each region (SNc: turquoise, kME=0.048; VTA: brown, kME=0.094) but both connections are weak —
 much weaker than the human PD-vs-control result — likely a sample-size effect (2,226 / 832 cells
 vs. tens of thousands in the human data), not necessarily a weaker true biological signal.
+
+**Correction (2026-08-13):** the kME values above were misread from the wrong `kME_*` column in
+`modules.csv`. Actual values: SNc turquoise kME=0.442, VTA brown kME=0.296 — moderate in both
+regions, and SNc *stronger* than VTA, not "both weak." See `analysis_results/mouse_GSE233866/
+README.md` for the corrected writeup.
 SNc resolved into 9 modules vs. VTA's 39 (many small) — also plausibly a sample-size artifact,
 worth rechecking with a larger VTA dataset if one turns up.
 

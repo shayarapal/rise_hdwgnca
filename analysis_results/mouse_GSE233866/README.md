@@ -26,19 +26,38 @@ Population sizes: **2,226 SNc cells, 832 VTA cells** (pooled across all 6 untrea
 of 4,514 total dopaminergic neurons identified via Th/Slc6a3/Ddc/Slc18a2 scoring. Soft power = 5
 for both (independently determined per network, not assumed from the human dataset).
 
-### Result: CACNA1D's module differs by region, but both connections are weak
+### Result: CACNA1D's module differs by region; connectivity is moderate in both, stronger in SNc
+
+**Correction (2026-08-13):** this section previously reported kME=0.048 (SNc) and kME=0.094
+(VTA), each "very weak." Both were misread from `modules.csv` — pulled from the wrong `kME_*`
+column rather than each gene's actual assigned-module column. The correct values, re-verified
+directly against `modules.csv` in both folders, are below.
 
 | Region | Module | kME (own module) | Module size (genes) | # modules total |
 |---|---|---|---|---|
-| SNc | turquoise | 0.048 (very weak) | 1,352 | 9 |
-| VTA | brown | 0.094 (weak) | 316 | 39 |
+| SNc | turquoise | 0.442 (moderate) | 1,352 | 9 |
+| VTA | brown | 0.296 (weak-to-moderate) | 316 | 39 |
 
-Unlike the human PD-vs-control result (kME 0.15 → 0.54), CACNA1D's module membership is weak in
-**both** mouse regions — likely reflecting the much smaller cell counts here making per-gene kME
-estimates noisier. Treat the SNc-vs-VTA module identity shift as informative, but don't read
-strong quantitative weight into these particular kME values. Similarly, the stark module-count
-difference (SNc: 9 vs. VTA: 39, many under 100 genes) is likely a sample-size artifact (832 vs.
-2,226 cells), not a confirmed biological difference in network organization.
+CACNA1D's module membership is a real, non-trivial connection in **both** mouse regions, not
+noise — and notably, SNc's connectivity (0.44) is stronger than VTA's (0.30), the opposite
+ranking of what this section previously (incorrectly) reported.
+
+This baseline SNc value (0.44) also happens to be numerically higher than every kME in the
+lesion-model section below (0.28–0.40) — **do not read that as a "connectivity drops once any
+disease modeling happens" trend.** The healthy-baseline cohort (this section) and the lesion-arm
+cohort (below) are two entirely separate sets of 6 animals from two different study arms; their
+networks were built and clustered independently, from different cell counts, with different
+module compositions. They are not a before/after series. The only *paired, controlled*
+comparison in this project is intact-vs-lesioned **within** the lesion-arm cohort (0.346→0.398,
+same animals, two hemispheres each) — that comparison, and the "connectivity increases after
+lesioning" claim built on it, is correct and unaffected by this fix. The human PD-vs-control
+comparison (kME 0.15 → 0.54) elsewhere in this project was independently re-checked against its
+own `modules.csv` files as part of this fix and is correct as stated — this misread was isolated
+to the two mouse healthy-baseline files. Treat the SNc-vs-VTA module identity shift
+as informative on its own; don't over-read the exact kME magnitudes given the noise inherent to
+per-gene estimates at this cell count. Similarly, the stark module-count difference (SNc: 9 vs.
+VTA: 39, many under 100 genes) is likely a sample-size artifact (832 vs. 2,226 cells), not a
+confirmed biological difference in network organization.
 
 **Enrichment:** SNc's turquoise module hits "Dopaminergic synapse" (KEGG, p.adj=2.8×10⁻⁴)
 directly; VTA's brown module hits "calcium ion transmembrane import into cytosol" (GO,

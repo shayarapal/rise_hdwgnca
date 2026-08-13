@@ -14,7 +14,7 @@ the cross-study synthesis.
 |---|---|---|---|---|---|
 | 1 | Human GSE243639, SNc | PD vs control (2 separate networks) | Qualitative (independently-built networks) | turquoise (control, kME=0.15) → blue (PD, kME=0.54) | Not a formal test — see #2 |
 | 2 | Human GSE243639, SNc | PD vs control (1 combined network) | **Formal DME test** | turquoise, kME=0.53 | **No** (p.adj=1.0) — but 2 *other* modules are (brown p=2.5e-22, blue p=5.0e-4) |
-| 3 | Mouse GSE233866, healthy | SNc vs VTA (2 separate networks) | Qualitative | turquoise (SNc, kME=0.05) → brown (VTA, kME=0.09) | Not a formal test — see #4 |
+| 3 | Mouse GSE233866, healthy | SNc vs VTA (2 separate networks) | Qualitative | turquoise (SNc, kME=0.44) → brown (VTA, kME=0.30) | Not a formal test — see #4 |
 | 4 | Mouse GSE233866, healthy | SNc vs VTA (formal preservation test) | **Formal statistical test** | turquoise, **Zsummary=20.4 (strongly preserved)** | Yes — module structure holds across regions |
 | 5 | Mouse GSE233866, 6-OHDA | SNc lesioned vs intact (2 separate networks) | Qualitative | blue (intact, kME=0.35) → brown (lesioned, kME=0.40) | Not a formal test — see #6 |
 | 6 | Mouse GSE233866, 6-OHDA | SNc lesioned vs intact (1 combined network) | **Formal DME test** | blue, kME=0.40 | **Yes — extremely** (p.adj=6.1×10⁻²⁶⁹) |

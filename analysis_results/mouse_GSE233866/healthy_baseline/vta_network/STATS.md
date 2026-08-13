@@ -16,9 +16,18 @@ Source files in this folder: `soft_power_table.csv`, `soft_power_recommendation.
 
 832 cells (pooled, 6 animals) → 39 modules.
 
-CACNA1D: module **brown**, kME = 0.094 (316 genes in module) — weak, but stronger than its SNc kME.
+CACNA1D: module **brown**, kME = 0.296 (316 genes in module) — weak-to-moderate, and weaker than
+its SNc kME (0.442) — the reverse of what this document previously (incorrectly) reported.
+
+**Correction (2026-08-13):** this previously read kME = 0.094 ("stronger than its SNc kME") —
+misread from the wrong `kME_*` column in `modules.csv`. 0.296 is the actual `kME_brown` value
+for Cacna1d, re-verified directly against the source file. The SNc/VTA connectivity ranking is
+now the opposite of what was originally stated.
 
 ## Enrichment (significant, p.adj < 0.05)
+
+Regenerated 2026-08-13 with the corrected `KEGG_2019_Mouse` library for KEGG terms (GO terms
+were unaffected by that bug — see `DATA_GSE233866/build_vta_network.R`).
 
 | Module | Term | DB | p.adj |
 |---|---|---|---|

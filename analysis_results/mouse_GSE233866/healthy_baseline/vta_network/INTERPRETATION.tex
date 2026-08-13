@@ -18,15 +18,22 @@ noisier gene-gene correlations, which tends to fragment clustering into many
 small modules rather than a few large, stable ones. Many of VTA's 39 modules
 are under 100 genes.
 
-CACNA1D is assigned to the \textbf{brown} module with $\mathrm{kME}=0.094$ ---
-still weak in absolute terms, but roughly double its SNc value (0.048),
-suggesting marginally tighter embedding in VTA's network despite the smaller,
-noisier sample it was estimated from.
+CACNA1D is assigned to the \textbf{brown} module with $\mathrm{kME}=0.296$ ---
+weak-to-moderate, and \emph{lower} than its SNc value (0.442), the opposite
+of what this document previously (incorrectly) reported.
+\emph{(Correction, 2026-08-13: this document previously reported
+$\mathrm{kME}=0.094$ and described it as roughly double the SNc value;
+that was misread from the wrong \texttt{kME\_*} column in
+\texttt{modules.csv}. 0.296 is \texttt{kME\_brown} for Cacna1d, re-verified
+directly against the source file --- SNc, not VTA, has the stronger
+connection.)}
 
 Brown is significantly enriched for \emph{calcium ion transmembrane import
-into cytosol} ($p_{\mathrm{adj}} = 7.8\times10^{-3}$) --- directly on-topic
-for a calcium-channel gene, though a visibly weaker enrichment signal than
+into cytosol} ($p_{\mathrm{adj}} = 7.8\times10^{-3}$, GO term, unaffected by
+the KEGG-library fix applied elsewhere in this project) --- directly
+on-topic for a calcium-channel gene, though a weaker enrichment signal than
 SNc turquoise's dopaminergic-synapse hit. Both regions place CACNA1D in a
-functionally sensible module; neither shows CACNA1D itself as central to it.
+functionally sensible, moderately-central module --- SNc's connection is the
+stronger of the two.
 
 \end{document}

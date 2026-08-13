@@ -35,10 +35,13 @@ Source: `snc_network/soft_power_table.csv`, `snc_network/soft_power_recommendati
 
 ## CACNA1D module membership, healthy baseline
 
+**Correction (2026-08-13):** the values below were originally reported as 0.048 (SNc) and 0.094
+(VTA), each misread from the wrong `kME_*` column. Re-verified directly against `modules.csv`:
+
 | Region | Module | kME (own module) | Module size (genes) |
 |---|---|---|---|
-| SNc | turquoise | 0.048 | 1,352 |
-| VTA | brown | 0.094 | 316 |
+| SNc | turquoise | 0.442 | 1,352 |
+| VTA | brown | 0.296 | 316 |
 
 Source: `snc_network/modules.csv`, `vta_network/modules.csv`
 
@@ -79,8 +82,14 @@ Source: `snc_network/enrichr_table.csv`, `vta_network/enrichr_table.csv`
 
 | Region | Module | Term | DB | p.adj |
 |---|---|---|---|---|
-| SNc | turquoise | Dopaminergic synapse | KEGG_2021_Human | 2.8×10⁻⁴ |
+| SNc | turquoise | Dopaminergic synapse | KEGG_2019_Mouse | 2.77×10⁻⁴ |
+| SNc | turquoise | Axon guidance | KEGG_2019_Mouse | 2.77×10⁻⁴ |
 | VTA | brown | Calcium ion transmembrane import into cytosol | GO_Biological_Process_2023 | 7.8×10⁻³ |
+
+**Correction (2026-08-13):** the SNc KEGG library was originally queried as `KEGG_2021_Human`
+(wrong species) rather than `KEGG_2019_Mouse` — see `DATA_GSE233866/build_snc_network.R`.
+Regenerated after the fix; the "Dopaminergic synapse" hit holds up under the correct library at
+essentially the same p.adj.
 
 (Non-significant example row for contrast — SNc yellow, "Melanocyte Differentiation," p.adj = 0.273 — included in the Field Guide artifact, not a real hit.)
 
