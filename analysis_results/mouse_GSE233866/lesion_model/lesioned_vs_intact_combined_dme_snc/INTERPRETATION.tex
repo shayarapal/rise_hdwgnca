@@ -1,0 +1,37 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{DME: Lesioned vs. Intact, within SNc --- Interpretation}
+\author{GSE233866, 6-OHDA lesion cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+Unlike the two standalone SNc networks (intact, lesioned), this analysis
+pools both conditions' cells (10{,}928 total) into a single network before
+testing, so module identity is shared and \texttt{FindDMEs} can compare
+eigengenes on equal footing rather than comparing across two independently
+clustered module sets.
+
+CACNA1D's module in this pooled network is \textbf{blue}
+($\mathrm{kME}=0.40$), and its eigengene is \textbf{significantly
+downregulated after lesioning} ($\mathrm{avg\_log2FC}=-1.66$,
+$p_{\mathrm{adj}} = 6.1\times10^{-269}$) --- one of the most statistically
+extreme results anywhere in this project, and far more extreme than the
+equivalent human PD-vs-control comparison, where CACNA1D's module does not
+reach significance at all.
+
+Combined with the standalone networks' finding that CACNA1D's own kME
+\emph{increases} after lesioning (0.346 $\to$ 0.398), the full picture is:
+CACNA1D's broader co-expression program is suppressed in the surviving
+lesioned population, while CACNA1D itself becomes relatively more central to
+whatever remains of that shrinking program. This is a hypothesis the data
+supports, not an established mechanism.
+
+The brown module's log2FC is flagged unstable in the source table (module
+eigengenes can be negative or near-zero, which destabilizes a ratio-based
+fold-change); its $p_{\mathrm{adj}}=7.1\times10^{-17}$ is unaffected by that
+instability and should still be trusted for direction and significance.
+
+\end{document}

@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{SNc $\to$ VTA Module Preservation --- Interpretation}
+\author{GSE233866, mouse midbrain DA neurons, healthy baseline}
+\date{}
+
+\begin{document}
+\maketitle
+
+Independent SNc and VTA networks disagree about which module CACNA1D belongs
+to (turquoise vs. brown) and disagree sharply on module count (9 vs. 39) ---
+on its own, ambiguous evidence for whether the two regions are structurally
+different or whether that is simply an artifact of unequal sample sizes
+(2{,}226 vs. 832 cells). \texttt{ModulePreservation} resolves this by testing
+a sharper, formal question: holding SNc's modules fixed as the reference,
+does that same gene community reproduce statistically in VTA's data.
+
+The reference (\textbf{turquoise}, CACNA1D's SNc module) reaches
+$Z_{\text{summary}} = 20.4$, comfortably above the $Z>10$ strong-preservation
+threshold, ranking 3rd of 8 real modules. This changes the interpretation
+of CACNA1D's module-identity switch: rather than evidence of a
+region-specific network dissolving, it more likely reflects CACNA1D's own
+connectivity shifting \emph{within} a gene neighborhood that remains intact
+across both regions. The permutation test ran to completion in 12 minutes at
+3.88\,GB peak memory --- comfortably under the resource ceiling that blocked
+the equivalent preservation test on the human dataset elsewhere in this
+project.
+
+One caveat worth carrying forward: VTA's smallest contributing animal
+(\texttt{s450}) supplied exactly 102 cells against a 100-cell minimum
+threshold --- not disqualifying, but the preservation result is not resting
+on a large margin at the low end of sample size.
+
+\end{document}

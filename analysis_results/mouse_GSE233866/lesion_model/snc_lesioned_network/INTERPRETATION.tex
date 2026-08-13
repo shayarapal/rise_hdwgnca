@@ -1,0 +1,27 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\title{SNc, Lesioned Hemisphere --- Interpretation}
+\author{GSE233866, 6-OHDA lesion cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+6-OHDA lesioning collapses the SNc population from 8{,}637 to 2{,}291 cells
+(3.8$\times$ loss), and the network built from what remains needs a higher
+soft power (7, $R^2=0.905$) than the intact-hemisphere network (6) to reach
+the same scale-free fit quality --- expected behavior when a smaller,
+survivor-biased cell population produces a noisier correlation structure.
+
+CACNA1D moves to the \textbf{brown} module with $\mathrm{kME}=0.398$, up from
+0.346 in the intact network. Read qualitatively, this points the same
+direction as the human PD comparison elsewhere in this project: CACNA1D
+becomes \emph{more} central to its co-expression module after
+disease/lesioning, not less. This standalone comparison is suggestive but not
+a statistical test in itself --- the two networks were clustered
+independently, so module identity and kME are not directly comparable at
+the significance level. The formal version of this claim is the DME test in
+\texttt{lesioned\_vs\_intact\_combined\_dme\_snc/}, which pools both
+conditions into one shared network before testing.
+
+\end{document}

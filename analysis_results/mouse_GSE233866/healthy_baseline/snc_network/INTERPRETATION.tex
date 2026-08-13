@@ -1,0 +1,30 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{SNc Co-expression Network --- Interpretation}
+\author{GSE233866, mouse midbrain DA neurons, healthy baseline}
+\date{}
+
+\begin{document}
+\maketitle
+
+The soft-thresholding power scan selects $\beta=5$ as the lowest power clearing
+the scale-free fit threshold ($R^2 \geq 0.8$; $R^2=0.801$ at $\beta=5$, versus
+$0.684$ at $\beta=4$), giving a well-behaved, non-arbitrary basis for the
+network. Clustering on 2{,}226 pooled SNc cells (6 animals) yields 9 modules,
+a modest number consistent with a relatively homogeneous cell population.
+
+CACNA1D is assigned to the \textbf{turquoise} module with $\mathrm{kME}=0.048$ ---
+numerically very weak, placing the gene near the low-connectivity tail of its
+module rather than among its hub genes. Taken alone this would suggest CACNA1D
+is only loosely embedded in SNc's co-expression structure.
+
+That reading is complicated, and partly justified, by the enrichment result:
+turquoise is significantly enriched for the KEGG term \emph{Dopaminergic synapse}
+($p_{\mathrm{adj}} = 2.8\times10^{-4}$), directly on-topic for a dopaminergic
+neuron dataset. So while CACNA1D itself is not a central gene, the module it
+belongs to is functionally coherent and biologically meaningful for this cell
+type --- the weak kME reflects CACNA1D's own position within a real program,
+not noise in the program itself.
+
+\end{document}

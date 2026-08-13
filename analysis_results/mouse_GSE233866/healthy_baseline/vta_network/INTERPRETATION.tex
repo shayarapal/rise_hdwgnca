@@ -1,0 +1,32 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{VTA Co-expression Network --- Interpretation}
+\author{GSE233866, mouse midbrain DA neurons, healthy baseline}
+\date{}
+
+\begin{document}
+\maketitle
+
+VTA's soft power scan independently selects $\beta=5$ ($R^2=0.850$), matching
+SNc's choice by coincidence of the data rather than by assumption --- each
+network's power was fit separately. Clustering on only 832 pooled VTA cells
+(versus SNc's 2{,}226) yields 39 modules, more than four times SNc's count.
+This is best read as a sample-size artifact rather than a genuine difference
+in how organized VTA's co-expression structure is: fewer cells produce
+noisier gene-gene correlations, which tends to fragment clustering into many
+small modules rather than a few large, stable ones. Many of VTA's 39 modules
+are under 100 genes.
+
+CACNA1D is assigned to the \textbf{brown} module with $\mathrm{kME}=0.094$ ---
+still weak in absolute terms, but roughly double its SNc value (0.048),
+suggesting marginally tighter embedding in VTA's network despite the smaller,
+noisier sample it was estimated from.
+
+Brown is significantly enriched for \emph{calcium ion transmembrane import
+into cytosol} ($p_{\mathrm{adj}} = 7.8\times10^{-3}$) --- directly on-topic
+for a calcium-channel gene, though a visibly weaker enrichment signal than
+SNc turquoise's dopaminergic-synapse hit. Both regions place CACNA1D in a
+functionally sensible module; neither shows CACNA1D itself as central to it.
+
+\end{document}

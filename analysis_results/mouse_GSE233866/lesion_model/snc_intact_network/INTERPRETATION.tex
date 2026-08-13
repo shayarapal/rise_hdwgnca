@@ -1,0 +1,24 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\title{SNc, Intact Hemisphere --- Interpretation}
+\author{GSE233866, 6-OHDA lesion cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+The intact-hemisphere SNc network, built from 8{,}637 cells (the largest
+single-condition population in this project), independently selects a soft
+power of 6 ($R^2 = 0.959$) --- higher than the healthy-baseline SNc network's
+power of 5, consistent with this being a different animal cohort under a
+different experimental arm rather than a repeat of the same data.
+
+CACNA1D falls in the \textbf{blue} module here with $\mathrm{kME}=0.346$, a
+substantially stronger connectivity value than either healthy-baseline
+region produced (SNc turquoise: 0.048; VTA brown: 0.094). This network exists
+primarily as a qualitative counterpart to the formal statistical comparison
+in \texttt{lesioned\_vs\_intact\_combined\_dme\_snc/}; its main use is as a
+sanity check that CACNA1D's connectivity in intact tissue is not itself an
+outlier before interpreting how it changes after lesioning.
+
+\end{document}
