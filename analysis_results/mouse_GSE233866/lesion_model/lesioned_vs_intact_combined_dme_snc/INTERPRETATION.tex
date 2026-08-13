@@ -8,30 +8,63 @@
 \begin{document}
 \maketitle
 
-Unlike the two standalone SNc networks (intact, lesioned), this analysis
-pools both conditions' cells (10{,}928 total) into a single network before
-testing, so module identity is shared and \texttt{FindDMEs} can compare
-eigengenes on equal footing rather than comparing across two independently
-clustered module sets.
+\subsection*{Why a pooled network, not the two standalone ones}
 
-CACNA1D's module in this pooled network is \textbf{blue}
-($\mathrm{kME}=0.40$), and its eigengene is \textbf{significantly
-downregulated after lesioning} ($\mathrm{avg\_log2FC}=-1.66$,
-$p_{\mathrm{adj}} = 6.1\times10^{-269}$) --- one of the most statistically
-extreme results anywhere in this project, and far more extreme than the
-equivalent human PD-vs-control comparison, where CACNA1D's module does not
-reach significance at all.
+Unlike the two standalone SNc networks (\texttt{../snc\_intact\_network/},
+\texttt{../snc\_lesioned\_network/}), this analysis pools both conditions'
+cells (10{,}928 total: 8{,}637 intact + 2{,}291 lesioned) into a single
+network before testing, so module identity is shared and \texttt{FindDMEs}
+can compare eigengenes on equal footing rather than comparing across two
+independently clustered module sets whose colors and boundaries aren't
+guaranteed to line up. This is the general pattern behind every formal DME
+test in this project: build one network on the union of the two groups
+being compared, then test each module's eigengene between the groups
+within that single, shared module definition.
+
+\subsection*{Result}
+
+CACNA1D's module in this pooled network is \textbf{blue} (2{,}249 genes ---
+larger than either standalone network's CACNA1D module, since it now
+contains cells and genes from both conditions), with $\mathrm{kME}=0.40$.
+Its eigengene is \textbf{significantly downregulated after lesioning}
+($\mathrm{avg\_log2FC}=-1.66$, $p_{\mathrm{adj}} = 6.1\times10^{-269}$) ---
+one of the most statistically extreme results anywhere in this project
+(only yellow's upregulation, $p_{\mathrm{adj}}\approx0$, and red's
+downregulation, $p_{\mathrm{adj}}=1.1\times10^{-141}$, are in the same
+range), and far more extreme than the equivalent human PD-vs-control
+comparison, where CACNA1D's own module does not reach significance at all
+(\texttt{archive/human\_GSE243639/analysis\_results/pd\_vs\_control\_combined\_dme/}
+--- archived 2026-08-13 pending a rebuild from raw data; see
+\texttt{archive/human\_GSE243639/README.md} at the repo root).
+
+\subsection*{Reconciling eigengene-level and kME-level results}
 
 Combined with the standalone networks' finding that CACNA1D's own kME
 \emph{increases} after lesioning (0.346 $\to$ 0.398), the full picture is:
 CACNA1D's broader co-expression program is suppressed in the surviving
-lesioned population, while CACNA1D itself becomes relatively more central to
-whatever remains of that shrinking program. This is a hypothesis the data
-supports, not an established mechanism.
+lesioned population at the eigengene level (fewer/less-active cells
+expressing the program overall), while CACNA1D itself becomes relatively
+more central to whatever remains of that shrinking program. These are not
+contradictory statistics --- eigengene level and kME are different
+quantities (module-wide average activity vs.\ one gene's correlation to
+that average) --- but the combination is a specific, testable hypothesis
+about what's happening mechanistically, not an established mechanism.
+Whether this reflects selective survival of cells with higher CACNA1D
+centrality, a genuine transcriptional response to lesioning, or both,
+cannot be distinguished from co-expression statistics alone; it would need
+an independent perturbation or lineage-tracing experiment to resolve.
+
+\subsection*{Caveats}
 
 The brown module's log2FC is flagged unstable in the source table (module
 eigengenes can be negative or near-zero, which destabilizes a ratio-based
 fold-change); its $p_{\mathrm{adj}}=7.1\times10^{-17}$ is unaffected by that
 instability and should still be trusted for direction and significance.
+More generally: with 2{,}249 genes, blue is the single largest module in
+this project, so its enrichment profile (not reported in this file; see
+\texttt{enrichr\_table.csv} directly) is likely to be broad and less
+specific than the smaller, more tightly-themed modules in the standalone
+networks --- a large pooled module absorbs genes from what might be several
+more specific sub-programs in a smaller, single-condition network.
 
 \end{document}

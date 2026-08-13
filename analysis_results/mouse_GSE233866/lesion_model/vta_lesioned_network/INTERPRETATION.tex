@@ -1,11 +1,14 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
 \title{VTA, Lesioned Hemisphere --- Interpretation}
 \author{GSE233866, 6-OHDA lesion cohort}
 \date{}
 
 \begin{document}
 \maketitle
+
+\subsection*{Network construction}
 
 VTA loses proportionally less of its population to lesioning than SNc does
 (4{,}426 $\to$ 1{,}720 cells, 2.6$\times$, versus SNc's 3.8$\times$) ---
@@ -14,12 +17,54 @@ region. The resulting 1{,}720-cell network selects soft power 6
 ($R^2=0.939$), matching the intact-SNc network's power despite the different
 cell population.
 
-CACNA1D lands in the \textbf{blue} module with $\mathrm{kME}=0.283$ ---
-weaker than either SNc lesion-arm value (intact: 0.346, lesioned: 0.398),
-placing lesioned-VTA closer to the healthy-baseline connectivity range for
-this gene. This network is the standalone counterpart to the formal
-region-comparison test in \texttt{snc\_vs\_vta\_combined\_dme\_lesioned/},
-which is where the statistically-supported SNc-vs-VTA claim during
-lesioning is actually established.
+\subsection*{CACNA1D's position}
+
+CACNA1D lands in the \textbf{blue} module (695 genes) with
+$\mathrm{kME}=0.283$ --- weaker than either SNc lesion-arm value (intact:
+0.346, lesioned: 0.398), placing lesioned-VTA closer to the healthy-baseline
+VTA connectivity (0.296) than to anything in SNc. Blue's top hub genes reach
+kME 0.53--0.71: \texttt{Hs6st3} (0.706), \texttt{Sorcs1} (0.640),
+\texttt{Negr1} (0.579), \texttt{Tshz2} (0.574), \texttt{Zfp804a} (0.564),
+\texttt{Tnr} (0.562), \texttt{Vip} (0.548), \texttt{Frmd5} (0.534) --- none
+of which overlap with either SNc lesion-arm module's hub genes, or with
+healthy-baseline VTA brown's hub genes. Only 18 of this module's 695 genes
+(2.6\%) are shared with healthy-baseline VTA brown's 316 genes --- a level
+of overlap similar to what two unrelated modules would show by chance,
+reinforcing the pattern already seen at baseline (see
+\texttt{../../healthy\_baseline/vta\_network/INTERPRETATION.tex}) that
+VTA's CACNA1D-containing module is not a stable, reproducible community the
+way SNc's is across every network in this project. Treat this network's
+specific gene membership as a much less reliable estimate than the
+equivalent SNc networks.
+
+\subsection*{Enrichment}
+
+Blue is enriched for \emph{Axon guidance} ($p_{\mathrm{adj}}=5.01\times10^{-4}$,
+\texttt{KEGG\_2019\_Mouse}), \emph{Potassium ion transport} and
+\emph{Potassium ion transmembrane transport} (both
+$p_{\mathrm{adj}}=1.87\times10^{-3}$, GO), \emph{Regulation of cell
+adhesion} ($p_{\mathrm{adj}}=1.87\times10^{-3}$, GO), \emph{Cell-cell
+adhesion via plasma-membrane adhesion molecules}
+($p_{\mathrm{adj}}=4.44\times10^{-3}$, GO), and \emph{Heparan sulfate
+proteoglycan metabolic process} ($p_{\mathrm{adj}}=4.72\times10^{-3}$, GO).
+The potassium-transport terms are new relative to any SNc module in this
+project --- CACNA1D itself is a voltage-gated calcium channel, not
+potassium, so this enrichment reflects the module's other members rather
+than CACNA1D's own annotated function, and is one more data point that
+VTA's lesioned network is organized around a genuinely different gene
+community than SNc's.
+
+\subsection*{Role in the region comparison}
+
+This network is the standalone counterpart to the formal region-comparison
+test in \texttt{../snc\_vs\_vta\_combined\_dme\_lesioned/}, which is where
+the statistically-supported SNc-vs-VTA claim during lesioning is actually
+established (CACNA1D's pooled-network module there is significantly more
+active in SNc, $p_{\mathrm{adj}}=4.5\times10^{-123}$). This network's low
+kME and near-zero gene-set overlap with its own healthy-baseline VTA
+counterpart is consistent with, though not proof of, that formal result:
+VTA's version of this program looks comparatively unstable and diffuse at
+every stage this project measures it, alongside SNc's comparatively stable,
+reproducible one.
 
 \end{document}

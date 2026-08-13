@@ -1,5 +1,6 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
 \title{SNc, Intact Hemisphere --- Interpretation}
 \author{GSE233866, 6-OHDA lesion cohort}
 \date{}
@@ -7,18 +8,52 @@
 \begin{document}
 \maketitle
 
+\subsection*{Network construction}
+
 The intact-hemisphere SNc network, built from 8{,}637 cells (the largest
 single-condition population in this project), independently selects a soft
 power of 6 ($R^2 = 0.959$) --- higher than the healthy-baseline SNc network's
 power of 5, consistent with this being a different animal cohort under a
-different experimental arm rather than a repeat of the same data.
+different experimental arm rather than a repeat of the same data. Clustering
+resolves 1{,}640 genes into CACNA1D's module alone, the largest
+CACNA1D-containing module of any network in this project.
 
-CACNA1D falls in the \textbf{blue} module here with $\mathrm{kME}=0.346$.
+\subsection*{CACNA1D's position}
+
+CACNA1D falls in the \textbf{blue} module here with $\mathrm{kME}=0.346$,
+below blue's top hub genes: \texttt{Klhl1} (0.826), \texttt{Robo2} (0.817),
+\texttt{Rgs6} (0.807), \texttt{Pbx1} (0.802), \texttt{Kcnj6} (0.801),
+\texttt{9530059O14Rik} (0.798), \texttt{Nos1ap} (0.797), \texttt{Frmd4b}
+(0.793). Four of these eight --- \texttt{Klhl1}, \texttt{Pbx1},
+\texttt{Rgs6}, \texttt{Nos1ap} --- are also top-eight hub genes of SNc
+turquoise in the completely separate healthy-baseline cohort
+(\texttt{../../healthy\_baseline/snc\_network/}), and the two modules share
+1{,}009 genes overall (75\% of turquoise's 1{,}352). This is strong,
+independent (non-statistical) evidence that SNc carries one consistent,
+reproducible CACNA1D-adjacent gene community across at least two unrelated
+animal cohorts, regardless of which color label a given clustering run
+happens to assign it.
 \emph{(Correction, 2026-08-13: this document previously compared against
 0.048/0.094 for the two healthy-baseline networks and called 0.346
-"substantially stronger than either" --- both those figures were misread
-from the wrong \texttt{kME\_*} column; the corrected healthy-baseline values
-are 0.442 (SNc) and 0.296 (VTA).)}
+``substantially stronger than either'' --- both those figures were misread
+from the wrong \texttt{kME\_*} column; the corrected healthy-baseline
+values are 0.442 (SNc) and 0.296 (VTA).)}
+
+\subsection*{Enrichment}
+
+Blue is enriched for a tightly axon/synapse-themed set of GO terms, more
+sharply focused than SNc turquoise's mixed synaptic/circadian/addiction
+profile: \emph{Axon guidance} ($p_{\mathrm{adj}}=1.58\times10^{-7}$),
+\emph{Modulation of chemical synaptic transmission} and \emph{Neuron
+projection guidance} (both $p_{\mathrm{adj}}=4.88\times10^{-5}$),
+\emph{Axonogenesis} ($p_{\mathrm{adj}}=7.86\times10^{-5}$), \emph{Regulation
+of cell migration} ($p_{\mathrm{adj}}=2.56\times10^{-4}$), and
+\emph{Cell-cell adhesion via plasma-membrane adhesion molecules}
+($p_{\mathrm{adj}}=2.93\times10^{-4}$). The much lower $p$-values here
+relative to the healthy-baseline network reflect this network's larger cell
+count (8{,}637 vs.\ 2{,}226), not necessarily a stronger biological signal.
+
+\subsection*{Not directly comparable to the healthy-baseline kME}
 
 \textbf{This network's kME is not directly comparable to the
 healthy-baseline networks' kME, and should not be read as a before/after
@@ -28,12 +63,15 @@ into its own network with its own module composition --- a numeric
 difference between them reflects cohort/batch variation as much as
 biology. The comparison this network \emph{is} built for is the paired one
 within this same lesion-arm cohort: intact (this network, 0.346) versus
-lesioned (\texttt{snc\_lesioned\_network/}, 0.398), same six animals,
+lesioned (\texttt{../snc\_lesioned\_network/}, 0.398), same six animals,
 contralateral hemispheres each. That comparison is the basis for the
 "connectivity increases after lesioning" claim, and the formal version of
-it is the DME test in \texttt{lesioned\_vs\_intact\_combined\_dme\_snc/}.
+it is the DME test in \texttt{../lesioned\_vs\_intact\_combined\_dme\_snc/}.
 This network's main use on its own is as a sanity check that CACNA1D's
 connectivity in intact tissue is not itself an outlier before interpreting
-how it changes after lesioning.
+how it changes after lesioning, and as one of the two networks whose raw
+gene-set overlap with each other (792 of 1{,}640 blue genes, 48\%, reappear
+in \texttt{../snc\_lesioned\_network/}'s smaller 855-gene brown module)
+provides a non-statistical cross-check on the formal DME result.
 
 \end{document}

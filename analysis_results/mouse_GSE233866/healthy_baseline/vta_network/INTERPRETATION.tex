@@ -8,32 +8,77 @@
 \begin{document}
 \maketitle
 
+\subsection*{Network construction}
+
 VTA's soft power scan independently selects $\beta=5$ ($R^2=0.850$), matching
 SNc's choice by coincidence of the data rather than by assumption --- each
-network's power was fit separately. Clustering on only 832 pooled VTA cells
-(versus SNc's 2{,}226) yields 39 modules, more than four times SNc's count.
-This is best read as a sample-size artifact rather than a genuine difference
-in how organized VTA's co-expression structure is: fewer cells produce
-noisier gene-gene correlations, which tends to fragment clustering into many
-small modules rather than a few large, stable ones. Many of VTA's 39 modules
-are under 100 genes.
+network's power was fit separately from its own \texttt{soft\_power\_table.csv}.
+Clustering on only 832 pooled VTA cells (versus SNc's 2{,}226) yields 39
+modules, more than four times SNc's count. This is best read as a
+sample-size artifact rather than a genuine difference in how organized
+VTA's co-expression structure is: fewer cells produce noisier gene-gene
+correlations, which tends to fragment clustering into many small modules
+rather than a few large, stable ones. Many of VTA's 39 modules are under
+100 genes, several under 20.
 
-CACNA1D is assigned to the \textbf{brown} module with $\mathrm{kME}=0.296$ ---
-weak-to-moderate, and \emph{lower} than its SNc value (0.442), the opposite
-of what this document previously (incorrectly) reported.
-\emph{(Correction, 2026-08-13: this document previously reported
-$\mathrm{kME}=0.094$ and described it as roughly double the SNc value;
-that was misread from the wrong \texttt{kME\_*} column in
-\texttt{modules.csv}. 0.296 is \texttt{kME\_brown} for Cacna1d, re-verified
-directly against the source file --- SNc, not VTA, has the stronger
-connection.)}
+\subsection*{CACNA1D's position}
 
-Brown is significantly enriched for \emph{calcium ion transmembrane import
-into cytosol} ($p_{\mathrm{adj}} = 7.8\times10^{-3}$, GO term, unaffected by
-the KEGG-library fix applied elsewhere in this project) --- directly
-on-topic for a calcium-channel gene, though a weaker enrichment signal than
-SNc turquoise's dopaminergic-synapse hit. Both regions place CACNA1D in a
-functionally sensible, moderately-central module --- SNc's connection is the
-stronger of the two.
+CACNA1D is assigned to the \textbf{brown} module (316 genes) with
+$\mathrm{kME}=0.296$ --- weak-to-moderate, and \emph{lower} than its SNc
+value (0.442), the opposite of what this document previously (incorrectly)
+reported. Brown's top hub genes reach kME 0.62--0.75:
+\texttt{Aldh1a1} (0.751), \texttt{Kcnab1} (0.744), \texttt{Pde1c} (0.711),
+\texttt{Tmem132d} (0.681), \texttt{Dmd} (0.671), \texttt{Cdh8} (0.657),
+\texttt{Ehbp1} (0.633), \texttt{Ebf1} (0.624) --- none of which overlap
+with SNc turquoise's top hub genes, a first hint that VTA's CACNA1D
+neighborhood is a distinct gene community, not just a smaller sample of
+the same one. \emph{(Correction, 2026-08-13: this document previously
+reported $\mathrm{kME}=0.094$ and described it as roughly double the SNc
+value; that was misread from the wrong \texttt{kME\_*} column in
+\texttt{modules.csv}. 0.296 is \texttt{kME\_brown} for Cacna1d,
+re-verified directly against the source file --- SNc, not VTA, has the
+stronger connection.)}
+
+\subsection*{Enrichment}
+
+Brown is significantly enriched for six terms (all $p_{\mathrm{adj}} <
+0.003$): \emph{Neuroactive ligand-receptor interaction}
+($p_{\mathrm{adj}}=1.37\times10^{-4}$, \texttt{KEGG\_2019\_Mouse}),
+\emph{Anterograde trans-synaptic signaling} and \emph{Chemical synaptic
+transmission} (both $p_{\mathrm{adj}}=3.64\times10^{-4}$, GO),
+\emph{Sensory perception of mechanical stimulus}
+($p_{\mathrm{adj}}=1.21\times10^{-3}$, GO), \emph{Axon guidance}
+($p_{\mathrm{adj}}=1.61\times10^{-3}$, GO), and \emph{Calcium signaling
+pathway} ($p_{\mathrm{adj}}=2.34\times10^{-3}$, \texttt{KEGG\_2019\_Mouse})
+--- directly on-topic for a calcium-channel gene in a synaptic module,
+though these enrichment values are individually weaker than SNc turquoise's
+strongest hit and the module itself is functionally broader (general
+synaptic transmission rather than a dopamine-specific pathway).
+
+\subsection*{Not reproducible across cohorts, unlike SNc}
+
+Where SNc turquoise's gene membership recurs strongly across two
+independently-built networks from a separate animal cohort (75\% and 47\%
+overlap; see \texttt{../snc\_network/INTERPRETATION.tex}), VTA brown does
+not: of its 316 genes, only 18 (5.7\%) reappear in
+\texttt{../../lesion\_model/vta\_lesioned\_network/}'s blue module (which
+itself contains 695 genes, so this is 2.6\% overlap from that side too).
+None of brown's top eight hub genes recur as hubs there. Combined with
+VTA's fragmented 39-module structure above, this is consistent with VTA's
+networks here being considerably less stable estimates than SNc's ---
+plausibly a direct consequence of VTA's much smaller cell counts (832 vs.
+2{,}226 at baseline; 1{,}720 vs.\ 2{,}291 in the lesion arm) rather than a
+claim that VTA's true biology is less organized. Read VTA-specific module
+claims in this project with more caution than the equivalent SNc claims.
+
+\subsection*{Regional comparison}
+
+Both regions place CACNA1D in a functionally sensible, moderately-central
+synaptic module --- SNc's connection is the stronger of the two, and its
+module's enrichment is both stronger and more dopamine-specific. The formal
+statistical test of whether SNc's neighborhood specifically (not VTA's)
+holds up across regions is \texttt{../snc\_vs\_vta\_preservation/}, which
+uses SNc as the reference precisely because it is the larger, more stable
+network of the pair.
 
 \end{document}

@@ -1,5 +1,6 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
 \title{SNc, Lesioned Hemisphere --- Interpretation}
 \author{GSE233866, 6-OHDA lesion cohort}
 \date{}
@@ -7,21 +8,58 @@
 \begin{document}
 \maketitle
 
+\subsection*{Network construction}
+
 6-OHDA lesioning collapses the SNc population from 8{,}637 to 2{,}291 cells
 (3.8$\times$ loss), and the network built from what remains needs a higher
 soft power (7, $R^2=0.905$) than the intact-hemisphere network (6) to reach
 the same scale-free fit quality --- expected behavior when a smaller,
-survivor-biased cell population produces a noisier correlation structure.
+survivor-biased cell population produces a noisier correlation structure
+that needs a stronger threshold to look properly scale-free.
 
-CACNA1D moves to the \textbf{brown} module with $\mathrm{kME}=0.398$, up from
-0.346 in the intact network. Read qualitatively, this points the same
-direction as the human PD comparison elsewhere in this project: CACNA1D
-becomes \emph{more} central to its co-expression module after
-disease/lesioning, not less. This standalone comparison is suggestive but not
-a statistical test in itself --- the two networks were clustered
-independently, so module identity and kME are not directly comparable at
-the significance level. The formal version of this claim is the DME test in
-\texttt{lesioned\_vs\_intact\_combined\_dme\_snc/}, which pools both
-conditions into one shared network before testing.
+\subsection*{CACNA1D's position}
+
+CACNA1D moves to the \textbf{brown} module (855 genes) with
+$\mathrm{kME}=0.398$, up from 0.346 in the intact network. Brown's top hub
+genes reach kME 0.73--0.78: \texttt{Slc35f1} (0.783), \texttt{Sgcz}
+(0.774), \texttt{Pbx1} (0.759), \texttt{Pex5l} (0.759), \texttt{Kcnj6}
+(0.752), \texttt{Zfhx3} (0.737), \texttt{Galntl6} (0.736), \texttt{Nos1ap}
+(0.728) --- five of which (\texttt{Slc35f1}, \texttt{Pbx1}, \texttt{Kcnj6},
+\texttt{Zfhx3}, \texttt{Nos1ap}) were also hub-adjacent in the intact
+network's blue module or healthy-baseline turquoise, underscoring that
+lesioning reshuffles which genes are most central within a persisting
+neighborhood rather than replacing the neighborhood outright: 792 of this
+module's 855 genes (93\%) were already present in the intact network's
+larger 1{,}640-gene blue module.
+
+Read qualitatively, the kME increase points the same direction as the
+human PD comparison elsewhere in this project: CACNA1D becomes \emph{more}
+central to its co-expression module after disease/lesioning, not less.
+This standalone comparison is suggestive but not a statistical test in
+itself --- the two networks were clustered independently, so module
+identity and kME are not directly comparable at the significance level.
+The formal version of this claim is the DME test in
+\texttt{../lesioned\_vs\_intact\_combined\_dme\_snc/}, which pools both
+conditions into one shared network before testing, and which does confirm
+a highly significant shift ($p_{\mathrm{adj}}=6.1\times10^{-269}$) --- in
+the eigengene's overall level, not the kME reported here; the two
+statistics answer related but distinct questions (see that document for
+the distinction).
+
+\subsection*{Enrichment}
+
+Brown remains enriched for the same broad synaptic/axon-guidance theme as
+the intact network, though with markedly weaker $p$-values, consistent with
+its much smaller cell count (2{,}291 vs.\ 8{,}637): \emph{Modulation of
+chemical synaptic transmission} ($p_{\mathrm{adj}}=1.27\times10^{-4}$),
+\emph{Cell-cell adhesion via plasma-membrane adhesion molecules}
+($p_{\mathrm{adj}}=8.12\times10^{-4}$), \emph{Axon guidance} and
+\emph{Nervous system development} (both $p_{\mathrm{adj}}=1.67\times10^{-3}$),
+\emph{Homophilic cell adhesion via plasma membrane adhesion molecules}
+($p_{\mathrm{adj}}=1.67\times10^{-3}$), and \emph{Neuron projection
+guidance} ($p_{\mathrm{adj}}=4.18\times10^{-3}$). The functional theme is
+stable across lesioning; what changes is CACNA1D's position within it and
+the eigengene's overall level (per the DME test), not what kind of program
+this module represents.
 
 \end{document}
