@@ -119,7 +119,7 @@ p_heatmap <- ggplot(df_long, aes(x = module, y = sample_id, fill = z_hME)) +
 ggsave(file.path(p$out_dir, "module_by_animal_heatmap.png"), plot = p_heatmap, width = 18, height = 6, dpi = 250)
 log_mem("after module_by_animal_heatmap(VTA)")
 
-dbs <- c("GO_Biological_Process_2023", "KEGG_2021_Human")
+dbs <- c("GO_Biological_Process_2023", "KEGG_2019_Mouse")
 obj <- RunEnrichr(obj, dbs = dbs, max_genes = 100, wgcna_name = p$wgcna_name)
 enrich_df <- GetEnrichrTable(obj, wgcna_name = p$wgcna_name)
 write.csv(enrich_df, file.path(p$out_dir, "enrichr_table.csv"), row.names = FALSE)
