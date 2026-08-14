@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{DME: SNc vs.\ VTA, within Intact Cells --- Interpretation}
+\author{GSE233866, 6-OHDA lesion cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection*{The gap this fills}
+
+\texttt{../snc\_vs\_vta\_combined\_dme\_lesioned/} tests SNc against VTA \emph{during}
+lesioning and finds CACNA1D's module dramatically more active in SNc
+($p_{\mathrm{adj}}=4.5\times10^{-123}$). That result was originally framed as evidence of
+something specifically active in the vulnerable region \emph{during neurodegeneration}. This
+network tests the missing counterfactual: is SNc already this different from VTA in the same
+animals' \textbf{intact} hemisphere, before any lesioning?
+
+\subsection*{Result: essentially the same, not disease-induced}
+
+CACNA1D's module (turquoise, 1{,}629 genes, kME=0.327) is higher in SNc than VTA with
+$\mathrm{avg\_log2FC}=+13.21$, $p_{\mathrm{adj}}\approx0$ (small enough to underflow double
+precision) --- both the direction and magnitude essentially match the lesioned comparison
+(+13.34, $p_{\mathrm{adj}}=4.5\times10^{-123}$). \textbf{This changes the framing of study \#7
+(and \#6): SNc's molecular distinctiveness from VTA for this program is not something that
+emerges or intensifies during neurodegeneration --- it is already present, at comparable
+strength, in intact tissue.} The honest claim is not "this activates during disease," it's
+"this regional difference exists at baseline in this cohort and persists through lesioning."
+
+\subsection*{Does this weaken the therapeutic argument?}
+
+No, but it changes what it's an argument for. A constitutive, baseline SNc-vs-VTA molecular
+distinction is arguably a \emph{better} basis for a region-selective drug target than a
+disease-induced one: it means the anatomical/molecular substrate for selectivity doesn't
+depend on catching the window during active degeneration, and it's consistent with SNc's
+selective vulnerability being a pre-existing property of the region rather than purely a
+consequence of the disease process. What this result does rule out is describing \#6/\#7's
+SNc-vs-VTA gap as itself evidence of a lesioning-specific mechanism --- that gap was already
+there. The genuinely lesioning-specific results in this project remain \#6
+(lesioned-vs-intact \emph{within} SNc, i.e.\ does SNc's own network change with lesioning ---
+yes) and \#8 (the same test within VTA --- yes, but far more weakly). This file establishes
+the SNc-vs-VTA axis is a standing baseline feature, not a disease response.
+
+\subsection*{Consistency with the rest of the project}
+
+Turquoise here shares 74\% of its genes with the independently-built
+\texttt{../snc\_intact\_network/} blue module, 52\% with
+\texttt{../../healthy\_baseline/snc\_network/}'s turquoise, and 51\% with this project's other
+pooled SNc-vs-VTA network (\texttt{../snc\_vs\_vta\_combined\_dme\_lesioned/}). This is now the
+fifth independently-clustered network in this project recovering substantially the same SNc
+gene neighborhood --- the single most consistent, reproducible signal across the whole mouse
+side of this work.
+
+\subsection*{Caveats}
+
+As with every DME table here, treat log2FC magnitude as directional only; blue's
+$\mathrm{avg\_log2FC}=+24.38$ is a module-eigengene-near-zero artifact (its own
+$p_{\mathrm{adj}}=1.0$ confirms it isn't even significant, so this doesn't affect any real
+conclusion). $p_{\mathrm{adj}}$ values reported as exactly 0 by R for turquoise/black/yellow/green
+have genuinely underflowed double-precision floating point, not been rounded --- treat them as
+``smaller than $10^{-300}$-ish,'' not literally zero.
+
+\end{document}

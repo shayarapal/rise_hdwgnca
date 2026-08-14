@@ -1,6 +1,6 @@
 # Synthesis: What This Body of Work Shows, and How to Use It
 
-Eight analyses across two species and two disease models, all built around one question: **is
+Nine analyses across two species and two disease models, all built around one question: **is
 CACNA1D's co-expression network disrupted in Parkinson's disease, in a way that points to
 additional drug targets beyond isradipine (which failed STEADY-PD III)?**
 
@@ -8,7 +8,7 @@ This document is the map: what each study actually shows, its strength of eviden
 belongs in a paper. Read the individual `README.md` in each subfolder for full detail — this is
 the cross-study synthesis.
 
-## The eight analyses at a glance
+## The nine analyses at a glance
 
 | # | Study | Comparison | Evidence type | CACNA1D's module | Statistically significant? |
 |---|---|---|---|---|---|
@@ -20,15 +20,25 @@ the cross-study synthesis.
 | 6 | Mouse GSE233866, 6-OHDA | SNc lesioned vs intact (1 combined network) | **Formal DME test** | blue, kME=0.40 | **Yes — extremely** (p.adj=6.1×10⁻²⁶⁹) |
 | 7 | Mouse GSE233866, 6-OHDA | SNc vs VTA, **within lesioned cells only** (1 combined network) | **Formal DME test** | blue, kME=0.32 | **Yes — extremely, and highly specific** (p.adj=4.5×10⁻¹²³, higher in SNc) |
 | 8 | Mouse GSE233866, 6-OHDA | VTA lesioned vs intact (1 combined network, added 2026-08-13) | **Formal DME test** | green, kME=0.27 | **Yes, but modestly** (p.adj=2.2×10⁻⁵ — same direction as #6, ~10²⁶⁴-fold less extreme) |
+| 9 | Mouse GSE233866, 6-OHDA | SNc vs VTA, **within intact cells only** (1 combined network, added 2026-08-13) | **Formal DME test** | turquoise, kME=0.33 | **Yes — extremely, essentially identical to #7** (p.adj≈0, +13.21 log2FC vs. #7's +13.34) |
 
 Study #7 answers a different question than #3/#4 or #5/#6: not baseline regional structure, and
-not disease-vs-healthy within one region, but **what's specifically more active in the vulnerable
-region (SNc) than the resistant one (VTA) while neurodegeneration is actually happening** — the
-comparison most directly relevant to a region-selective treatment target. 11 of 12 modules differ
-significantly here (expected — SNc and VTA are fundamentally different populations), but
-CACNA1D's own module is among the strongest signals in the whole table, and specifically more
-active in SNc — arguably the single most direct result this project has produced for "why SNc
-specifically."
+not disease-vs-healthy within one region, but **what's more active in SNc than VTA while
+lesioned cells are being compared** — originally framed as the signal most directly relevant to
+a region-selective treatment target, specific to neurodegeneration itself. 11 of 12 modules
+differ significantly here (expected — SNc and VTA are fundamentally different populations), and
+CACNA1D's own module is among the strongest signals in the whole table.
+
+**Study #9 revises that framing, and this is important: the SNc-vs-VTA gap is not
+disease-induced.** #9 runs the identical design on the same six animals' *intact* hemispheres
+and finds essentially the same result as #7 (+13.21 log2FC vs. +13.34, both p.adj effectively
+0) — meaning SNc and VTA are already this molecularly distinct for CACNA1D's program **before**
+any lesioning, and lesioning does not detectably widen the gap. Report #7/#9 together as "SNc
+and VTA are constitutively distinct for this program, and that distinction persists through
+disease" — not "this activates during neurodegeneration." This is arguably a *stronger* basis
+for a region-selective target (an anatomical baseline difference, not something contingent on
+catching an active disease window), but it is a different claim than what #7 alone would
+suggest, and should not be presented as if it were.
 
 **Study #8 is the necessary check on #6's framing, and the honest result changes that framing.**
 #6 alone could be (mis)read as "CACNA1D's network response to lesioning is an SNc-specific
@@ -106,15 +116,19 @@ match. Pair this with #8 (the VTA-only version of the same test) rather than pre
 isolation — report plainly that VTA shows the same direction of response, at markedly lower
 magnitude, so a reviewer sees you tested the specificity claim yourself rather than assuming it.
 
-**Results — region-selective signal during neurodegeneration (the sharpest single finding)** —
-study #7. This is the comparison most directly relevant to a region-selective treatment: within
-lesioned tissue only, CACNA1D's module is one of the most significant differences in the entire
-SNc-vs-VTA table (p.adj=4.5×10⁻¹²³) and is specifically *more active in SNc*, the region that's
-actually dying. Lead with this alongside #6 as the strongest quantitative results in the whole
-project — but note the caveat that 11 of 12 modules differ here, since SNc and VTA are different
-populations to begin with, so frame CACNA1D's result as "notably strong even against that broad
-background," not as a uniquely surprising isolated hit. This is also the result that #8 leaves
-untouched and that should carry the region-selectivity claim — not #6 read on its own.
+**Results — constitutive region-selective signal (the sharpest single finding)** — studies
+#7/#9 together, not #7 alone. CACNA1D's module is one of the most significant differences in
+the entire SNc-vs-VTA table both during lesioning (#7, p.adj=4.5×10⁻¹²³) and in intact tissue
+(#9, p.adj≈0, essentially the same magnitude) — specifically *more active in SNc*, the region
+that's selectively vulnerable, regardless of disease state. Lead with this pair alongside #6 as
+the strongest quantitative results in the whole project — but (a) note the caveat that 11 of 12
+modules differ here, since SNc and VTA are different populations to begin with, so frame
+CACNA1D's result as "notably strong even against that broad background," not as a uniquely
+surprising isolated hit, and (b) state plainly that #9 shows this is a baseline/constitutive
+difference, not something lesioning switches on — that's a more precise, arguably stronger,
+claim than "active during neurodegeneration," but it is a different claim and should be worded
+that way. This is also the result that #8 leaves untouched and that should carry the
+region-selectivity claim — not #6 read on its own.
 
 **Discussion — candidate targets beyond isradipine** — synthesize across all of it: propose
 UCHL1, SACS, AKAP9, HSP90AA1/AB1, PDE4D, PRKG1 (this last pair from the earlier informal
@@ -146,4 +160,5 @@ and should be worded that precisely in any writeup.
 - `mouse_GSE233866/lesion_model/lesioned_vs_intact_combined_dme_snc/` — study #6
 - `mouse_GSE233866/lesion_model/vta_lesioned_network/` + `snc_vs_vta_combined_dme_lesioned/` — study #7
 - `mouse_GSE233866/lesion_model/vta_intact_network/` + `lesioned_vs_intact_combined_dme_vta/` — study #8 (added 2026-08-13)
+- `mouse_GSE233866/lesion_model/snc_vs_vta_combined_dme_intact/` — study #9 (added 2026-08-13)
 - `reminders/reminder.md` — running project log of decisions and pivots made along the way

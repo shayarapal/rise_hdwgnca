@@ -20,6 +20,9 @@ for the full cross-study picture.
 4. **`lesion_model/vta_intact_network/` + `lesioned_vs_intact_combined_dme_vta/`** (added
    2026-08-13) — lesioned vs. intact, within VTA. *Does VTA respond to lesioning the same way
    SNc does, or is SNc's response actually unique to SNc?*
+5. **`lesion_model/snc_vs_vta_combined_dme_intact/`** (added 2026-08-13) — SNc vs. VTA, within
+   the **intact** state. *Is SNc already this different from VTA before any lesioning, or does
+   §3's gap only appear once disease starts?* — see §5 below: it's already there at baseline.
 
 ---
 
@@ -158,6 +161,12 @@ project.
 
 ## 3. SNc vs. VTA, within the lesioned state — what's active in the vulnerable region *during* disease
 
+**§5 revises this section's framing (added 2026-08-13):** the SNc-vs-VTA gap below turns out to
+already be present in the *intact* hemisphere at essentially the same magnitude — it is a
+standing baseline difference, not something that emerges during neurodegeneration. Read
+"during disease" below as "present at baseline and preserved through disease," not
+"disease-induced." The numbers themselves are unaffected.
+
 The most disease-and-region-specific comparison: not baseline regional structure (§1), not
 disease-vs-healthy within one region (§2), but which genes/modules are more active in SNc than
 VTA specifically while neurodegeneration is happening — the signal most directly relevant to a
@@ -230,6 +239,36 @@ mechanism isn't unique to SNc, but its consequences are — SNc's version of the
 dramatically larger and more active throughout the lesioned state, which is still a
 meaningful basis for a region-selective treatment argument, just a more precise one than
 before this section existed.
+
+---
+
+## 5. SNc vs. VTA, within the intact state — is §3's gap disease-induced or already there? (added 2026-08-13)
+
+§3 found CACNA1D's module dramatically more active in SNc than VTA **during lesioning**
+(p.adj=4.5×10⁻¹²³), framed as evidence of something specific to the vulnerable region during
+neurodegeneration. This section tests the missing counterfactual on the same 6 animals'
+**intact** hemispheres: is SNc already this different from VTA before any lesion, or does the
+gap only appear once disease starts?
+
+**`lesion_model/snc_vs_vta_combined_dme_intact/`** (formal DME, 13,063 pooled cells: 8,637 SNc
++ 4,426 VTA): CACNA1D's module (turquoise, 1,629 genes, kME=0.327) is higher in SNc with
+avg_log2FC=+13.21, p.adj≈0 (underflows double precision) — essentially identical in direction
+and magnitude to §3's lesioned result (+13.34, p.adj=4.5×10⁻¹²³).
+
+**Revised conclusion: the SNc-vs-VTA gap is not disease-induced — it's a standing baseline
+feature of this cohort that persists through lesioning, not something that emerges during
+neurodegeneration.** This changes §3's framing: describe it as "SNc and VTA are already
+molecularly distinct for this program before disease, and that distinction remains through
+lesioning," not "this activates during neurodegeneration." This doesn't weaken the
+region-selective treatment argument — a constitutive anatomical distinction is arguably a more
+reliable basis for selectivity than a disease-triggered one — but it changes what the evidence
+supports. The genuinely lesioning-*specific* findings remain §2/§4 (does each region's own
+network change with lesioning — yes for SNc strongly, yes for VTA weakly), not §3/§5 (which
+show a real but constitutive regional difference, present with or without lesioning).
+
+Turquoise here shares 74% of its genes with `snc_intact_network` and 52% with the
+healthy-baseline SNc network — the fifth independently-built network in this project to
+recover substantially the same SNc gene neighborhood.
 
 ---
 
