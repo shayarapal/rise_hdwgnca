@@ -8,7 +8,10 @@ they're derived here via Sox6 (SNc) / Calb1 (VTA) marker scoring, mirroring the 
 own method (see `DATA_GSE233866/build_seurat_GSE233866.R` / `build_seurat_lesion_intact.R`).
 
 Three sub-analyses, each answering a different question. See `analysis_results/SYNTHESIS.md`
-for the full cross-study picture.
+for the full cross-study picture. **[`cav13_expression_atlas.html`](cav13_expression_atlas.html)**
+(added 2026-08-14) is a self-contained interactive 3D viewer — open it directly in a browser —
+plotting all 20,132 SNc/VTA-labeled cells across every network below at once (UMAP1/UMAP2 as
+x/y, each cell's own *Cacna1d* expression as height), filterable by condition.
 
 1. **`healthy_baseline/`** — SNc vs. VTA, no disease. *Are the regions structurally different at
    baseline?*
