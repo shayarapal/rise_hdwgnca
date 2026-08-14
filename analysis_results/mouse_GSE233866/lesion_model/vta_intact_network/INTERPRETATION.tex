@@ -1,0 +1,69 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{VTA, Intact Hemisphere --- Interpretation}
+\author{GSE233866, 6-OHDA lesion cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection*{Why this network was built}
+
+Built 2026-08-13, in response to a direct question: the lesion-model analysis had a full
+intact/lesioned/combined-DME trio for SNc, but VTA only had a standalone lesioned network
+(\texttt{../vta\_lesioned\_network/}), built solely as input to the SNc-vs-VTA-during-lesioning
+DME test. There was no VTA-only intact network to pair it with, so no within-VTA
+intact-vs-lesioned comparison was possible. This network, and
+\texttt{../lesioned\_vs\_intact\_combined\_dme\_vta/}, fill that gap.
+
+\subsection*{Network construction}
+
+4{,}426 cells (the intact/contralateral hemisphere across the same 6 lesion-arm animals used
+throughout this section) cluster at soft power 4 ($R^2=0.959$) --- notably lower than every
+other lesion-arm network (SNc intact: 6, SNc lesioned: 7, VTA lesioned: 6), and lower than
+this project has needed anywhere else except human control tissue. A lower required power
+generally reflects a network with less pronounced scale-free structure to begin with.
+
+\subsection*{CACNA1D's position}
+
+CACNA1D falls in the \textbf{pink} module --- at 132 genes, the smallest CACNA1D-containing
+module in this project by a wide margin (compare SNc's 855--1{,}640 or even VTA's own other
+networks at 316--695) --- with $\mathrm{kME}=0.230$, the lowest standalone-network kME
+recorded anywhere in this project.
+
+\subsection*{No significant enrichment --- new information}
+
+Pink returns \textbf{zero} significantly enriched terms across both libraries (826 terms
+tested; best result "Morphine addiction," KEGG\_2019\_Mouse, $p_{\mathrm{adj}}=0.120$, well
+short of conventional significance). Every other CACNA1D-containing module examined in this
+project --- SNc at every stage, and VTA's own healthy-baseline and lesioned networks --- has
+at least one term clearing $p_{\mathrm{adj}}<0.02$. This is the first direct evidence in the
+project that a CACNA1D module isn't just weakly connected but may not represent a coherent
+functional program at all in this particular slice of the data.
+
+\subsection*{Gene-set instability, quantified}
+
+Pink shares only 19 of its 132 genes (14\%) with \texttt{../vta\_lesioned\_network/}'s blue
+module (695 genes) --- roughly a third of the equivalent SNc intact-vs-lesioned overlap
+(48\%, \texttt{../snc\_intact\_network/} vs.\ \texttt{../snc\_lesioned\_network/}). Combined
+with VTA's already-documented pattern (39-module fragmentation at baseline, near-zero
+overlap between healthy-baseline and lesioned VTA modules --- see
+\texttt{../../healthy\_baseline/vta\_network/INTERPRETATION.tex}), this is now the fourth
+independent line of evidence that VTA's networks in this project are considerably less
+stable estimates than SNc's, most plausibly because every VTA network here is built from
+roughly a quarter to a half of SNc's cell count.
+
+\subsection*{What this means for the region-selectivity question}
+
+This network's low kME, small module size, complete lack of enrichment, and low
+cross-network gene overlap should all be read primarily as \textbf{estimate instability},
+not as \emph{evidence against} CACNA1D having a role in VTA. A weak, noisy estimate is not
+the same as a confirmed null result. The more informative comparison for the
+region-selectivity question this network was built to help answer is the paired
+kME trajectory: VTA intact (0.230, here) $\to$ VTA lesioned (0.283,
+\texttt{../vta\_lesioned\_network/}) --- see
+\texttt{../lesioned\_vs\_intact\_combined\_dme\_vta/INTERPRETATION.tex} for that comparison
+alongside SNc's, and what it does and does not support.
+
+\end{document}

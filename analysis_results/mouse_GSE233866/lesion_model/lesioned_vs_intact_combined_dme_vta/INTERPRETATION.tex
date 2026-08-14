@@ -1,0 +1,70 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{DME: Lesioned vs.\ Intact, within VTA --- Interpretation}
+\author{GSE233866, 6-OHDA lesion cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection*{The honest headline result}
+
+\textbf{VTA shows the same qualitative pattern as SNc under lesioning, not a null result.}
+CACNA1D's module (green, 191 genes) is significantly downregulated after lesioning
+($\mathrm{avg\_log2FC}=-1.23$, $p_{\mathrm{adj}}=2.2\times10^{-5}$) --- the same direction as
+SNc's equivalent result in \texttt{../lesioned\_vs\_intact\_combined\_dme\_snc/}
+($\mathrm{avg\_log2FC}=-1.66$, $p_{\mathrm{adj}}=6.1\times10^{-269}$). The standalone-network
+kME comparison shows the same pattern: VTA intact (0.230, \texttt{../vta\_intact\_network/})
+$\to$ VTA lesioned (0.283, \texttt{../vta\_lesioned\_network/}) is an increase of +0.053
+(+23\% relative), essentially the same size as SNc's +0.052 (+15\% relative, 0.346 $\to$
+0.398). This means the narrower claim ``only SNc responds to lesioning, VTA does not'' is
+\textbf{not supported} by this pair of results, and should not be the framing used going
+forward.
+
+\subsection*{What is still true, and still supports region-selectivity}
+
+The direction is shared, but the \emph{magnitude} is not. SNc's eigengene-level shift is
+roughly $10^{264}$-fold more statistically extreme than VTA's by $p_{\mathrm{adj}}$, and
+numerically larger by log2FC (−1.66 vs.\ −1.23) despite SNc's pooled network having under
+twice VTA's cell count (10{,}928 vs.\ 6{,}146) --- a gap this large is not explainable by
+statistical power alone. Ranked against the other modules in each table, CACNA1D's module is
+the 2nd-most-extreme result of 7 tested in SNc, but only 10th of 12 in VTA --- a genuinely
+unremarkable module within its own table in VTA, in contrast to being one of the standout
+results in SNc's table.
+
+More importantly, the pre-existing, unaffected-by-any-of-this result in
+\texttt{../snc\_vs\_vta\_combined\_dme\_lesioned/} remains the strongest, most directly
+relevant evidence: comparing SNc-lesioned against VTA-lesioned cells directly in one pooled
+network, CACNA1D's module is dramatically more active in SNc
+($\mathrm{avg\_log2FC}=+13.34$, $p_{\mathrm{adj}}=4.5\times10^{-123}$). That test asks the
+right question for a region-selective treatment target --- not ``does VTA respond to
+lesioning at all'' (it does, modestly), but ``is SNc's version of this program bigger than
+VTA's during the vulnerable state'' (yes, by a wide, formally-tested margin).
+
+\subsection*{Revised framing for the thesis}
+
+The evidence now supports a more precise claim than before, not a weaker one:
+\textbf{CACNA1D's co-expression program responds to 6-OHDA lesioning in both midbrain
+dopaminergic regions in the same direction, but the response is quantitatively much larger
+in SNc, and SNc's program remains far more active than VTA's throughout the lesioned state.}
+This is a defensible, honest, and still therapeutically relevant story for a Cav1.3-blockade
+argument: the mechanism this project's data points to is not unique to SNc, but its
+consequences are concentrated there, which is exactly the kind of asymmetry that would make
+a region-selective intervention meaningful. Do not claim VTA is unaffected --- the data does
+not support that, and a reviewer checking this specific comparison would find the same
+result shown here.
+
+\subsection*{Caveats}
+
+VTA's underlying networks are considerably less stable than SNc's throughout this project
+(low cross-network gene-set overlap, fragmented baseline clustering, and --- new as of this
+analysis --- zero significant enrichment in \texttt{../vta\_intact\_network/}'s CACNA1D
+module; see that file's interpretation). Some of VTA's weaker, noisier signal here may
+reflect genuine biology and some may reflect these smaller networks being harder to
+estimate precisely; this analysis cannot fully separate the two. As with every other DME
+table in this project, treat log2FC magnitude as directional evidence only --- module
+eigengenes can be negative or near-zero, which destabilizes fold-change arithmetic
+independent of whether the underlying $p$-value is sound.
+
+\end{document}

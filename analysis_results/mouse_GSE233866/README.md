@@ -17,6 +17,9 @@ for the full cross-study picture.
 3. **`lesion_model/vta_lesioned_network/` + `snc_vs_vta_combined_dme_lesioned/`** — SNc vs. VTA,
    within the lesioned state only. *What's specifically active in the vulnerable region during
    neurodegeneration itself* — the most direct analog of a region-selective treatment target.
+4. **`lesion_model/vta_intact_network/` + `lesioned_vs_intact_combined_dme_vta/`** (added
+   2026-08-13) — lesioned vs. intact, within VTA. *Does VTA respond to lesioning the same way
+   SNc does, or is SNc's response actually unique to SNc?*
 
 ---
 
@@ -194,13 +197,50 @@ trust.
 
 ---
 
+## 4. VTA's own lesioned vs. intact response — is SNc's story unique to SNc? (added 2026-08-13)
+
+Section 2 shows CACNA1D's module becomes more central (kME 0.346→0.398) and significantly
+perturbed at the eigengene level (p.adj=6.1×10⁻²⁶⁹) after lesioning, **within SNc**. Until
+this section was added, VTA had no equivalent test — only a standalone lesioned network
+(§3), never paired with a VTA-only intact network. That gap matters: without it, "CACNA1D
+responds to lesioning" could not be distinguished from "CACNA1D responds to lesioning
+*specifically in SNc*."
+
+**`lesion_model/vta_intact_network/`**: 4,426 cells, soft power 4. CACNA1D lands in module
+pink, kME=0.230, 132 genes — the smallest, lowest-kME CACNA1D module in this project, and
+the only one with zero significant enrichment hits (best p.adj=0.120). Gene overlap with
+`vta_lesioned_network`'s module is 14% (19/132 genes), well below SNc's equivalent 48%.
+
+**`lesion_model/lesioned_vs_intact_combined_dme_vta/`** (formal DME, 6,146 pooled cells):
+CACNA1D's module (green, 191 genes) is **significantly downregulated after lesioning**
+(avg_log2FC=−1.23, p.adj=2.2×10⁻⁵) — the same direction as SNc. The standalone kME also
+rises the same direction as SNc: 0.230→0.283 (+23% relative, vs. SNc's +15%).
+
+**Honest conclusion: VTA shows the same qualitative pattern as SNc, not a null result.**
+"Only SNc responds to lesioning" is not supported and should not be claimed. What *is*
+still true: SNc's effect is far larger — ~10²⁶⁴-fold more extreme by p.adj, numerically
+bigger by log2FC, and ranked 2nd-most-extreme of 7 modules in SNc's table vs. 10th of 12 in
+VTA's — despite SNc's pooled network having under 2× VTA's cell count, so this gap isn't
+just statistical power. And critically, §3's direct SNc-vs-VTA-during-lesioning test
+(p.adj=4.5×10⁻¹²³, CACNA1D's module far more active in SNc) is untouched by this and remains
+the strongest evidence for region-selectivity. The defensible framing going forward: this
+mechanism isn't unique to SNc, but its consequences are — SNc's version of the program is
+dramatically larger and more active throughout the lesioned state, which is still a
+meaningful basis for a region-selective treatment argument, just a more precise one than
+before this section existed.
+
+---
+
 ## Caveats (apply throughout this folder)
 
 - Sox6/Calb1-only cells were left unlabeled rather than forced into a region (1,456 of 4,514 DA
   neurons in the untreated arm) — a stricter or looser labeling rule would shift population sizes.
-- Enrichr's `GO_Biological_Process_2023` / `KEGG_2021_Human` libraries are queried directly with
-  mouse gene symbols (not converted to human orthologs); matching is generally case-insensitive
-  in practice but hasn't been independently verified for these specific runs.
+- Enrichr's `GO_Biological_Process_2023` is queried directly with mouse gene symbols (GO isn't
+  species-forked in Enrichr); `KEGG_2019_Mouse` (fixed 2026-08-13, was previously the
+  wrong-species `KEGG_2021_Human`) is the correct mouse-specific library.
 - These are mouse findings. Translating them back to the human results in
-  `analysis_results/human_GSE243639/` is a separate, later inference — not something to claim
-  directly from any comparison in this folder.
+  `archive/human_GSE243639/analysis_results/` (archived 2026-08-13 pending a rebuild) is a
+  separate, later inference — not something to claim directly from any comparison in this folder.
+- Every kME value in this folder was independently re-verified against `modules.csv` on
+  2026-08-13 after two healthy-baseline figures were found misread (see §1's correction note).
+  If you're citing a kME from an older copy of this README, re-check it against the source file.
