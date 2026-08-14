@@ -38,6 +38,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   reference analysis preamble. `enrichR` is attached only; no enrichment is run.
 - The soft-power plot is also written as `soft_power_plot.pdf` (`ggsave`, 10×5), reachable through
   the file browser. The plot now marks the recommended power via `PlotSoftPowers(selected_power=)`.
+- **`DATA_GSE233866/build_vta_intact_network.R` + `run_dme_vta.R`** — the VTA counterpart to the
+  existing SNc `intact`/`lesioned`/combined-DME trio, which previously had no equivalent (VTA only
+  had a standalone `lesioned` network, built solely as input to the SNc-vs-VTA DME test). Finds
+  CACNA1D's module responds to 6-OHDA lesioning in VTA in the **same direction** as SNc (module
+  eigengene down, kME up: 0.230→0.283) but at far lower magnitude (p.adj=2.2×10⁻⁵ vs. SNc's
+  6.1×10⁻²⁶⁹ — roughly 264 orders of magnitude less extreme). This means "only SNc responds to
+  lesioning" is **not** supported by this project's data and has been removed from every doc that
+  implied it; the region-selectivity claim now rests on the direct SNc-vs-VTA-during-lesioning
+  comparison (`snc_vs_vta_combined_dme_lesioned/`, unaffected, p.adj=4.5×10⁻¹²³), not on VTA
+  showing no response at all. Full writeup: `analysis_results/mouse_GSE233866/README.md` §4.
+- `archive/human_GSE243639/` — the built human Seurat objects and analysis results were archived
+  (not deleted) to allow a clean rebuild from raw data; `DATA_UNZIPPED/` still has the raw counts
+  and every build script needed to reproduce them.
+- Per-folder `STATS.md` + `INTERPRETATION.tex` next to every `analysis_results/mouse_GSE233866/`
+  result folder (10 folders total), sourced directly from each folder's own CSV/JSON rather than
+  copied from a central summary — see the "Removed" note below for why that matters here.
+- Published an interactive "hdWGCNA Field Guide" reference explaining every statistic type
+  (soft power, kME, module eigengenes, preservation Zsummary, DME log2FC/p.adj, Enrichr output)
+  produced by this pipeline, using the mouse SNc network as a worked example.
 
 ### Fixed
 - **`ConstructNetwork(soft_power = NULL)` silently yields `Inf`** when no power clears the
@@ -59,6 +78,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `SetupForWGCNA` errors if gene selection yields 0 genes, naming the parameter responsible.
   `gene_select`/`fraction` are not `SetupForWGCNA` formals — they ride through `...` to
   `SelectNetworkGenes` — so this also trips if a future hdWGCNA stops forwarding them.
+- **All five mouse GSE233866 network build scripts queried the wrong species' KEGG library** —
+  `dbs <- c("GO_Biological_Process_2023", "KEGG_2021_Human")`, copy-pasted unchanged from the
+  human GSE243639 scripts into every mouse one (`build_snc_network.R`, `build_vta_network.R`,
+  `build_snc_intact_network.R`, `build_snc_lesioned_network.R`, `build_vta_lesioned_network.R`).
+  Switched to `KEGG_2019_Mouse` and reran all five networks against freshly re-downloaded raw
+  counts; every non-enrichment output (`modules.csv`, soft power) was verified byte-identical to
+  the pre-fix run, confirming only the KEGG enrichment results were affected. The previously-cited
+  SNc "Dopaminergic synapse" hit holds up under the correct library at essentially the same p.adj
+  (2.8×10⁻⁴ → 2.77×10⁻⁴).
+- **CACNA1D's healthy-baseline kME was misread from the wrong `kME_*` column** in both
+  `healthy_baseline/{snc_network,vta_network}/modules.csv` — reported as 0.048 (SNc, "very weak")
+  and 0.094 (VTA, "weak, stronger than SNc"); actually 0.442 (SNc) and 0.296 (VTA), both moderate,
+  with SNc — not VTA — the stronger connection, the reverse of what was originally stated. This
+  had already propagated into the mouse README, `SYNTHESIS.md`'s cross-study table, and the
+  published Field Guide before being caught; all were corrected with an inline note showing the
+  old value, the new value, and why, rather than a silent rewrite. The human GSE243639 kME figures
+  were independently re-checked against their own source files and are correct — this misread was
+  isolated to the two mouse healthy-baseline files.
+
+### Removed
+- `analysis_results/mouse_GSE233866/healthy_baseline/STATISTICS_SUMMARY.md` — a hand-maintained
+  combined-numbers table that had already drifted out of sync with the per-folder `STATS.md` files
+  and `README.md` (missing study #8 entirely) days after being written. Removed rather than kept
+  in sync going forward; the per-folder `STATS.md` files sit next to their source data and
+  `README.md` is the single narrative summary.
 
 ### Known issues
 - `MetacellsByGroups` still uses `reduction = "pca"` and `max_shared = 15`, where the hdWGCNA

@@ -142,8 +142,10 @@ CACNA1D's module here: **blue, kME=0.40**.
 | green | +0.75 | 1.0 (n.s.) | no change |
 
 **CACNA1D's module is massively downregulated after lesioning** (p.adj ≈ 6×10⁻²⁶⁹) — far more
-statistically extreme than the equivalent human DME result (`human_GSE243639/
-pd_vs_control_combined_dme/`, where CACNA1D's module does NOT reach significance). Combined with
+statistically extreme than the equivalent human DME result
+(`archive/human_GSE243639/analysis_results/pd_vs_control_combined_dme/` — archived
+2026-08-13 pending a rebuild, see `archive/human_GSE243639/README.md`; CACNA1D's module does
+NOT reach significance there). Combined with
 the kME increase above: CACNA1D's broader co-expression program is suppressed in surviving
 lesioned neurons, but CACNA1D itself becomes *relatively* more central to whatever remains of
 that shrinking program — a hypothesis worth stating, not an established mechanism.
