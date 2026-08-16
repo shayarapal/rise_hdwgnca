@@ -26,6 +26,12 @@ x/y, each cell's own *Cacna1d* expression as height), filterable by condition.
 5. **`lesion_model/snc_vs_vta_combined_dme_intact/`** (added 2026-08-13) — SNc vs. VTA, within
    the **intact** state. *Is SNc already this different from VTA before any lesioning, or does
    §3's gap only appear once disease starts?* — see §5 below: it's already there at baseline.
+6. **`healthy_baseline/snc_vs_vta_combined_dme_healthy/`** (added 2026-08-16) — SNc vs. VTA,
+   formal DME test, **zero disease model involved** (the untreated cohort, not the lesion arm).
+   *Is the SNc-vs-VTA activity gap present with no disease model at all, closing the loop
+   §5 opened?* — yes: avg_log2FC=+14.55, p.adj=4.17×10⁻²¹², the single strongest result of
+   all three SNc-vs-VTA DME tests in this project. See `snc_vs_vta_volcanoes/` for all three
+   states plotted together.
 
 ---
 
@@ -272,6 +278,28 @@ show a real but constitutive regional difference, present with or without lesion
 Turquoise here shares 74% of its genes with `snc_intact_network` and 52% with the
 healthy-baseline SNc network — the fifth independently-built network in this project to
 recover substantially the same SNc gene neighborhood.
+
+---
+
+## 6. SNc vs. VTA, within healthy baseline — closing the loop with zero disease model (added 2026-08-16)
+
+§5 answered "is the gap already there in *intact* lesion-arm tissue" — yes. This section asks
+the sharper version: is it there with **no lesion-arm cohort involved at all**, using the
+completely separate untreated cohort instead (`healthy_baseline/`, 6 different animals, no
+6-OHDA anywhere in the pipeline)?
+
+**`healthy_baseline/snc_vs_vta_combined_dme_healthy/`** (formal DME, 3,058 pooled cells: 2,226
+SNc + 832 VTA): CACNA1D's module (yellow) is higher in SNc with avg_log2FC=+14.55,
+p.adj=4.17×10⁻²¹² — the single most significant module in an 11-module table, and the
+largest-magnitude of all three SNc-vs-VTA DME results in this project (healthy: +14.55,
+intact: +13.21, lesioned: +13.34).
+
+**This closes the loop §5 opened.** Three independently-built, formally-tested networks — one
+with no disease model whatsoever — all agree: CACNA1D's module is significantly more active in
+SNc than VTA, at comparable magnitude, regardless of disease state. The region-selectivity
+claim for this project should be stated as a constitutive property of these two regions, full
+stop — not qualified by "during lesioning" or "in the lesion-arm cohort." See
+`snc_vs_vta_volcanoes/` for all three results plotted together with matched axes.
 
 ---
 

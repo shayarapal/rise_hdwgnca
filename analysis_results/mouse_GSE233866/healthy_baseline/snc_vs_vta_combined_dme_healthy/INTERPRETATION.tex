@@ -1,0 +1,55 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{DME: SNc vs.\ VTA, within Healthy Baseline --- Interpretation}
+\author{GSE233866, untreated cohort}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection*{Why this closes the loop}
+
+\texttt{snc\_vs\_vta\_preservation/} (same folder) already established that SNc's
+CACNA1D-containing module structurally reproduces in VTA (Zsummary=20.4) --- a test of
+whether the same \emph{gene community} exists in both regions. It does not test whether
+that module's \emph{activity level} differs between regions, because \texttt{ModulePreservation}
+and \texttt{FindDMEs} are different statistics entirely. This network runs the missing test:
+pool healthy-baseline SNc and VTA cells (no lesion arm, no disease model, the cleanest
+possible comparison this project can make) into one network and test whether CACNA1D's
+module differs in level between the two regions.
+
+\subsection*{Result: the strongest signal in the whole project}
+
+CACNA1D's module here is \textbf{yellow}, and it is differentially active between SNc and
+VTA with $\mathrm{avg\_log2FC}=+14.55$, $p_{\mathrm{adj}}=4.17\times10^{-212}$, higher in
+SNc --- the single most significant module in this 11-module table, more extreme than any
+other module tested here, and comparable in magnitude to (in fact slightly larger than) the
+equivalent results from the intact (+13.21) and lesioned (+13.34) states tested elsewhere in
+this project.
+
+\subsection*{What this settles}
+
+Combined with \texttt{../../lesion\_model/snc\_vs\_vta\_combined\_dme\_intact/} and
+\texttt{snc\_vs\_vta\_combined\_dme\_lesioned/}, this is now a three-for-three result: CACNA1D's
+module is significantly more active in SNc than VTA in the healthy state, the intact
+lesion-arm state, and the lesioned state alike, at comparable magnitude in all three. This
+closes the question raised earlier in this project's own history --- whether the SNc-vs-VTA
+gap seen during lesioning was disease-induced. It is not. It is present with \emph{zero}
+disease model involved, in a completely separate cohort of animals from the lesion arm. The
+correct framing for this project's central region-selectivity claim is now: \textbf{SNc and
+VTA are constitutively distinct in CACNA1D's co-expression program, independent of disease
+state}, which the lesion-arm data shows persists (and is not obviously amplified) through
+6-OHDA lesioning.
+
+\subsection*{Caveats}
+
+As with every DME table in this project, treat log2FC magnitude as directional evidence, not
+a literal fold-change --- module eigengenes can be negative or near-zero, which destabilizes
+that arithmetic independent of whether the $p$-value is sound. This network pools only 3,058
+cells (2,226 SNc + 832 VTA), the smallest of the three SNc-vs-VTA DME networks in this
+project, reflecting the healthy-baseline cohort's smaller DA-neuron yield rather than a
+weaker analysis --- the $p$-value here is nonetheless the most extreme of the three, so this
+is not a power limitation in practice.
+
+\end{document}

@@ -74,6 +74,11 @@ When working in this repository, you must:
 - Do **not** change the docker-compose service topology (`r-service`, `backend`,
   `react-ui` + shared volume) without asking first.
 
+## Git
+
+- Do **not** add a `Co-Authored-By: Claude` (or similar) trailer to commit messages in
+  this repo. The user attributes AI assistance themselves when they choose to.
+
 ## Evaluation
 
 Before returning code, check yourself against these questions and surface anything
