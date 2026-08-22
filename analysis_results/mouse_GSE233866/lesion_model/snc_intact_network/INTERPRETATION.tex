@@ -74,4 +74,54 @@ gene-set overlap with each other (792 of 1{,}640 blue genes, 48\%, reappear
 in \texttt{../snc\_lesioned\_network/}'s smaller 855-gene brown module)
 provides a non-statistical cross-check on the formal DME result.
 
+\subsection*{Hub genes more central than CACNA1D}
+
+CACNA1D sits in blue as a moderately-connected member, not a hub: kME=0.346,
+rank 249 of 1{,}640 genes. 248 genes outrank it. The ten below were curated
+from that pool for plausible mechanistic relevance to SNc pacemaking,
+calcium-channel biology, or Parkinson's disease --- not by raw kME alone ---
+and checked against the published literature (independent of this project's
+own data) for a documented CACNA1D/Ca$_v$1.3-specific connection.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\toprule
+Gene & kME (rank) & Tier & Grounding \\
+\midrule
+\texttt{Rgs6} & 0.807 (3) & Strong & GAP terminating the D2AR/GIRK Gi/o signal Ca$_v$1.3 also feeds; Rgs6$^{-/-}$ mice show age-dependent SNc loss + $\alpha$-synuclein accumulation \\
+\texttt{Pbx1} & 0.802 (4) & Moderate & PD-relevant DA-development TF, reduced in PD SNc (Villaescusa et al.\ 2016, \emph{EMBO J}) --- transcriptional, not a channel-level link \\
+\texttt{Kcnj6} (GIRK2) & 0.801 (5) & Strong & Same D2AR$\to$G$\beta\gamma\to$GIRK2 module as Ca$_v$1.3 (Dragicevic et al.\ 2014, \emph{Brain}); Ca$_v$1.3-KO mice show altered D2-autoreceptor responses \\
+\texttt{Drd2} & 0.738 (20) & Strong & D2 autoreceptor in the same Dragicevic et al.\ pathway \\
+\texttt{Kcnd3} (Kv4.3) & 0.684 (33) & Strong & Same somatodendritic pacemaker complex framework (Ca$_v$1.2/1.3, HCN, SK3, Kv4.3) \\
+\texttt{Kcnn3} (SK3) & 0.681 (34) & Strong & Documented native complex with Ca$_v$1.3 + HCN in midbrain DA neurons (proteomics) \\
+\texttt{Cadps2} (CAPS2) & 0.646 (43) & Strong (release) & Dense-core-vesicle exocytosis regulator in TH$^+$/VMAT2$^+$ DA neurons; not a direct channel interaction \\
+\texttt{Sncaip} & 0.634 (49) & Moderate/indirect & $\alpha$-synuclein-interacting; Ca$_v$1.3-dependent Ca$^{2+}$/$\alpha$-synuclein mitochondrial toxicity is a documented SNc-vulnerability pathway, no direct interaction shown \\
+\texttt{Gabbr2} & 0.477 (131) & Strong & Direct physical interaction (Y2H, co-IP, ICC) with the Ca$_v$1.3 $\alpha$1 subunit; GABA-B facilitates L-current via this complex \\
+\texttt{Nr4a2} (Nurr1) & 0.462 (146) & Strong & Nurr1 conditional-KO causes somatic Ca-channel dysfunction in DA neurons, paralleling LRRK2-G2019S (\emph{npj Parkinson's Disease}, 2023) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Two cautions.} \texttt{Klhl1} is this module's single highest-kME
+gene (rank 1, kME=0.826) but is deliberately excluded from the table above:
+published electrophysiology shows it modulates Ca$_v$2.1 (P/Q-type) and
+Ca$_v$3.2 (T-type) currents and specifically does \emph{not} affect
+Ca$_v$1.2/Ca$_v$1.3 --- a top-ranked gene with evidence against a CACNA1D
+link, worth reporting rather than assuming relevance from rank alone.
+\texttt{Adarb2} (rank 14) is a false friend: the documented CACNA1D
+IQ-domain RNA-editing story belongs to a \emph{different} gene, \texttt{Adarb1}
+(ADAR2) --- Adarb2 encodes ADAR3, a catalytically inactive paralog that
+inhibits the active ADARs rather than editing anything itself.
+
+\paragraph{Everything else above CACNA1D.} Of the remaining $\sim$238 genes
+ranked above CACNA1D in this module, none surfaced a documented
+CACNA1D/Ca$_v$1.3-specific literature connection during search --- including
+\texttt{Nos1ap} (a well-known L-type-channel modulator, but for CACNA1C in
+cardiac tissue, not CACNA1D in SNc), \texttt{Erc2} (a VGCC-clustering active-zone
+protein, but for Ca$_v$2.1, not Ca$_v$1.3), and \texttt{Slc6a3} (DAT, a
+canonical co-expressed SNc marker with no documented direct DAT--Ca$_v$1.3
+interaction). Co-expression in this dataset does not by itself imply a
+functional interaction; these are reported as co-expression-only findings.
+
 \end{document}
