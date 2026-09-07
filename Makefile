@@ -3,10 +3,10 @@ export
 
 R_SERVICE_PORT ?= 8100
 BACKEND_PORT   ?= 8200
-SHARED_DIR     ?= ./local_data
+SHARED_DIR     ?= C:/projects/rise_hdwgnca_data
 
 .PHONY: install run-r run-backend run-ui dev docker-up docker-down setup-local \
-        install-tests test-phase1 test-phase2 test-phase3 test-all
+        sync-scripts install-tests test-phase1 test-phase2 test-phase3 test-all
 
 # ── Local install (run once before using run-r / run-backend / run-ui) ────────
 install:
@@ -64,7 +64,21 @@ test-phase3:
 test-all:
 	pytest src/tests/phase1/ src/tests/phase2/ -v
 
-# ── Local data directory (mirrors /shared volume) ─────────────────────────────
+# ── Shared data directory (bind-mounted at /shared in both containers) ────────
+# SHARED_DIR lives outside this repo; the datasets are 10-20 GB and never enter git.
+# Subdirectory names are load-bearing: the R scripts address data as
+# /shared/DATA_GSE233866/<file>, so those names must match exactly.
 setup-local:
-	mkdir -p $(SHARED_DIR)/data $(SHARED_DIR)/results
-	@echo "Place your .h5Seurat files in $(SHARED_DIR)/data/"
+	mkdir -p $(SHARED_DIR)/DATA_GSE233866 $(SHARED_DIR)/DATA_UNZIPPED $(SHARED_DIR)/results
+	@echo "SHARED_DIR = $(SHARED_DIR)"
+	@echo "Download raw counts from GEO (GSE233866, GSE243639) into the matching subdirs,"
+	@echo "then run 'make sync-scripts'."
+
+# Publish the tracked R scripts into SHARED_DIR so they are visible at /shared inside the
+# containers. The repo is the single source of truth — never hand-edit the copies, and
+# re-run this after changing any script. Copies are overwritten, not merged.
+sync-scripts:
+	@mkdir -p $(SHARED_DIR)/DATA_GSE233866 $(SHARED_DIR)/DATA_UNZIPPED
+	cp DATA_GSE233866/*.R $(SHARED_DIR)/DATA_GSE233866/
+	cp DATA_UNZIPPED/*.R  $(SHARED_DIR)/DATA_UNZIPPED/
+	@echo ">>> Synced $$(ls DATA_GSE233866/*.R | wc -l) mouse + $$(ls DATA_UNZIPPED/*.R | wc -l) human scripts to $(SHARED_DIR)"

@@ -155,8 +155,8 @@ CACNA1D's module here: **blue, kME=0.40**.
 
 **CACNA1D's module is massively downregulated after lesioning** (p.adj ≈ 6×10⁻²⁶⁹) — far more
 statistically extreme than the equivalent human DME result
-(`archive/human_GSE243639/analysis_results/pd_vs_control_combined_dme/` — archived
-2026-08-13 pending a rebuild, see `archive/human_GSE243639/README.md`; CACNA1D's module does
+(human GSE243639 `pd_vs_control_combined_dme/` — removed from the working tree 2026-09-06
+pending a rebuild; recover with `git checkout 2daa16a -- archive/`. CACNA1D's module does
 NOT reach significance there). Combined with
 the kME increase above: CACNA1D's broader co-expression program is suppressed in surviving
 lesioned neurons, but CACNA1D itself becomes *relatively* more central to whatever remains of
@@ -310,8 +310,8 @@ stop — not qualified by "during lesioning" or "in the lesion-arm cohort." See
 - Enrichr's `GO_Biological_Process_2023` is queried directly with mouse gene symbols (GO isn't
   species-forked in Enrichr); `KEGG_2019_Mouse` (fixed 2026-08-13, was previously the
   wrong-species `KEGG_2021_Human`) is the correct mouse-specific library.
-- These are mouse findings. Translating them back to the human results in
-  `archive/human_GSE243639/analysis_results/` (archived 2026-08-13 pending a rebuild) is a
+- These are mouse findings. Translating them back to the human GSE243639 results (removed from
+  the working tree 2026-09-06 pending a rebuild; `git checkout 2daa16a -- archive/`) is a
   separate, later inference — not something to claim directly from any comparison in this folder.
 - Every kME value in this folder was independently re-verified against `modules.csv` on
   2026-08-13 after two healthy-baseline figures were found misread (see §1's correction note).

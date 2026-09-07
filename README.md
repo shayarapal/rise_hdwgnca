@@ -201,8 +201,9 @@ Services listen on `:8100` (r-service) and `:8200` (backend).
 ### Locally (without Docker)
 
 ```bash
-cp .env.example .env          # edit SHARED_DIR to point at your data
-make setup-local              # creates local_data/data and local_data/results
+cp .env.example .env          # edit SHARED_DIR to point at your data (outside this repo)
+make setup-local              # creates $SHARED_DIR/{DATA_GSE233866,DATA_UNZIPPED,results}
+make sync-scripts             # publishes the tracked R scripts into $SHARED_DIR
 make install                  # installs R packages, pip deps, node_modules (once, takes ~1-3 h for R)
 
 make run-r          # starts plumber on :8100  (terminal 1)
@@ -295,12 +296,42 @@ src/
     HDWGCNA_SYSTEM_CHECK_PROMPT.md
 
 analysis_results/     # pipeline outputs — kept at root, separate from the code
-DATA_GSE233866/       # raw mouse data
-DATA_UNZIPPED/        # unpacked inputs and standalone R build scripts
-local_data/           # gitignored; bind-mounted into both containers at /shared
+DATA_GSE233866/       # mouse GSE233866 R scripts (build + DME + diagnostics). Scripts only
+DATA_UNZIPPED/        # human GSE243639 R scripts (build + network). Scripts only
 
 docker-compose.yml    # service topology (build contexts point into src/)
 Makefile              # local dev shortcuts
 .env.example
 CLAUDE.md             # AI pair-programming context and guardrails
 ```
+
+### Where the data lives
+
+`DATA_GSE233866/` and `DATA_UNZIPPED/` hold **R scripts only — no data**. The datasets are
+roughly 16.8 GB of raw counts and built Seurat objects, and they live **outside this
+repository** in the directory named by `SHARED_DIR` (see `.env.example`), which is
+bind-mounted at `/shared` in both containers:
+
+```
+$SHARED_DIR/                     # e.g. C:/projects/rise_hdwgnca_data — NOT in the repo
+  DATA_GSE233866/                # mouse: counts + built Seurat objects + run outputs
+  DATA_UNZIPPED/                 # human: GSE243639_RAW.tar, filtered counts, SEURAT_INPUT/
+  results/                       # earlier exploratory runs
+```
+
+Those two subdirectory names are **load-bearing**: the R scripts address data by absolute
+container path, e.g. `/shared/DATA_GSE233866/seurat_GSE233866_SNc_VTA.rds`. Renaming them
+breaks every script.
+
+To set this up from a fresh clone:
+
+```bash
+cp .env.example .env          # then edit SHARED_DIR to a path outside the repo
+make setup-local              # creates the subdirectory skeleton
+# download raw counts from GEO: GSE233866 (mouse), GSE243639 (human)
+make sync-scripts             # publishes the tracked R scripts into SHARED_DIR
+```
+
+`make sync-scripts` copies `DATA_GSE233866/*.R` and `DATA_UNZIPPED/*.R` into `SHARED_DIR` so
+they are visible at `/shared` inside the containers. **The repo is the single source of
+truth** — never hand-edit the copies; re-run the target after changing a script.

@@ -155,14 +155,22 @@ def test_docker_compose_backend_port():
 
 
 def test_docker_compose_shared_mount_on_both_services():
-    # /shared is a relative bind mount of ./local_data (host-OS-agnostic), so the same
-    # folder is visible at /shared in both containers on Windows and Linux, and users can
-    # drop .rds files into local_data/ without docker cp. Both services must mount it.
+    # /shared is bind-mounted from the SHARED_DIR host directory, which lives OUTSIDE this
+    # repo because the datasets are ~16.8 GB and must never enter git. The same folder is
+    # visible at /shared in both containers on Windows and Linux, so users can drop .rds
+    # files into it without docker cp. Both services must mount it, and the interpolation
+    # must keep the ./local_data fallback so a bare `docker compose up` with no .env still
+    # works. See .env.example and the README's "Where the data lives" section.
     services = _compose()["services"]
     for svc in ("r-service", "backend"):
-        svc_volumes = services[svc].get("volumes", [])
-        assert any("local_data" in str(v) and "/shared" in str(v) for v in svc_volumes), (
-            f"service '{svc}' must bind-mount ./local_data to /shared"
+        svc_volumes = [str(v) for v in services[svc].get("volumes", [])]
+        shared = [v for v in svc_volumes if v.endswith(":/shared")]
+        assert shared, f"service '{svc}' must bind-mount a host directory to /shared"
+        assert any("${SHARED_DIR" in v for v in shared), (
+            f"service '{svc}' must mount ${{SHARED_DIR}} at /shared, not a hardcoded path"
+        )
+        assert any(":-./local_data}" in v for v in shared), (
+            f"service '{svc}' must keep the ./local_data default for SHARED_DIR"
         )
 
 

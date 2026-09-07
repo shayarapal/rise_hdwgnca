@@ -20,7 +20,10 @@ node_modules/
 frontend/dist/
 frontend/.vite/
 
-# Data — never commit Seurat objects, raw counts, or results
+# Data — never commit Seurat objects, raw counts, or results.
+# As of 2026-09-06 the datasets live OUTSIDE this repo, in the directory named by
+# SHARED_DIR (see .env.example). These rules are kept as a safety net so that a stray
+# download into the repo is still ignored.
 *.h5Seurat
 *.h5Seurat.old
 *.h5ad
@@ -31,16 +34,16 @@ frontend/.vite/
 *.mtx.gz
 local_data/
 
-# GSE243639 (~11 GB: 29 samples of raw 10x counts + built Seurat objects).
-# Download from GEO; rebuild with DATA_UNZIPPED/build_seurat_GSE243639.R.
+# GSE243639 (~5.6 GB: 29 samples of raw 10x counts + built Seurat objects).
+# Download from GEO into $SHARED_DIR/DATA_UNZIPPED/; rebuild with build_seurat_GSE243639.R.
 # The build scripts themselves ARE tracked — everything else in here is not.
 DATA_UNZIPPED/*
 !DATA_UNZIPPED/*.R
 GSE243639_Clinical_data.csv
 hdwgcna_out/
 
-# GSE233866 (mouse SNc/VTA atlas, ~330 MB raw counts + built Seurat objects).
-# Download from GEO; rebuild with DATA_GSE233866/build_seurat_GSE233866.R.
+# GSE233866 (mouse SNc/VTA atlas, ~9.9 GB raw counts + built Seurat objects).
+# Download from GEO into $SHARED_DIR/DATA_GSE233866/; rebuild with build_seurat_GSE233866.R.
 DATA_GSE233866/*
 !DATA_GSE233866/*.R
 

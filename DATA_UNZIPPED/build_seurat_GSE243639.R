@@ -8,7 +8,22 @@ library(Seurat)
 library(dplyr)
 # later: library(harmony); library(WGCNA); library(hdWGCNA)
 
-root <- "/Users/shayanrapally/projects/rise_hdwgnca/DATA_UNZIPPED"
+# Data root. Resolution order:
+#   1. SHARED_DIR env var (host runs)      -> $SHARED_DIR/DATA_UNZIPPED
+#   2. /shared/DATA_UNZIPPED if it exists  -> inside the r-service container
+#   3. ./DATA_UNZIPPED relative to cwd     -> repo checkout fallback
+# The data itself lives outside the repo; see .env.example and the README.
+root <- local({
+  sd <- Sys.getenv("SHARED_DIR", "")
+  if (nzchar(sd)) return(file.path(sd, "DATA_UNZIPPED"))
+  if (dir.exists("/shared/DATA_UNZIPPED")) return("/shared/DATA_UNZIPPED")
+  "DATA_UNZIPPED"
+})
+if (!dir.exists(root)) {
+  stop("Data root not found: ", root,
+       "\nSet SHARED_DIR to the directory holding DATA_UNZIPPED/ ",
+       "(see .env.example), or download the raw data from GEO accession GSE243639.")
+}
 inp  <- file.path(root, "SEURAT_INPUT")                 # 29 per-sample folders (barcodes/features/matrix)
 meta <- read.csv(file.path(root, "GSE243639_metadata_clean.csv"), stringsAsFactors = FALSE)
 

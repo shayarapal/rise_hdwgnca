@@ -162,8 +162,11 @@ and should be worded that precisely in any writeup.
 
 ## File map
 
-- `../archive/human_GSE243639/analysis_results/pd_vs_control_separate_networks/{control_network,pd_network}/` — study #1 (archived 2026-08-13 pending a rebuild from raw data; see `../archive/human_GSE243639/README.md`)
-- `../archive/human_GSE243639/analysis_results/pd_vs_control_combined_dme/` — study #2 (archived, same note as above)
+- study #1 — human GSE243639 `pd_vs_control_separate_networks/{control_network,pd_network}/`.
+  Removed from the working tree 2026-09-06 pending a rebuild from raw data; still in git history:
+  `git show 2daa16a:archive/human_GSE243639/README.md`, or restore the whole tree with
+  `git checkout 2daa16a -- archive/`.
+- study #2 — human GSE243639 `pd_vs_control_combined_dme/`. Same note as above.
 - `mouse_GSE233866/healthy_baseline/{snc_network,vta_network}/` — study #3
 - `mouse_GSE233866/healthy_baseline/snc_vs_vta_preservation/` — study #4
 - `mouse_GSE233866/lesion_model/{snc_lesioned_network,snc_intact_network}/` — study #5
