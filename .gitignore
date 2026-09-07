@@ -47,6 +47,10 @@ hdwgcna_out/
 DATA_GSE233866/*
 !DATA_GSE233866/*.R
 
+# Analysis outputs moved to $SHARED_DIR/analysis_results/ on 2026-09-06 and untracked
+# since. Earlier revisions remain in git history (git checkout 446ce5f -- analysis_results/).
+analysis_results/
+
 # OS
 .DS_Store
 Thumbs.db

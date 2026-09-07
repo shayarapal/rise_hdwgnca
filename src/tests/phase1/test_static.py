@@ -10,7 +10,11 @@ import sys
 import pytest
 import yaml
 
-ROOT = pathlib.Path(__file__).parent.parent.parent
+# This file lives at <repo>/src/tests/phase1/, so three .parent hops reach <repo>/src.
+# Service trees (r-service/, backend/, frontend/) are addressed from SRC; top-level
+# config (docker-compose.yml, Makefile) lives one level up, at the repository root.
+SRC = pathlib.Path(__file__).parent.parent.parent
+REPO_ROOT = SRC.parent
 
 
 # ---------------------------------------------------------------------------
@@ -18,22 +22,25 @@ ROOT = pathlib.Path(__file__).parent.parent.parent
 # ---------------------------------------------------------------------------
 
 REQUIRED_FILES = [
-    "r-service/plumber.R",
-    "r-service/entrypoint.R",
-    "r-service/install.R",
-    "r-service/Dockerfile",
-    "backend/main.py",
-    "backend/client.py",
-    "backend/requirements.txt",
-    "backend/Dockerfile",
-    "frontend/Dockerfile",
-    "docker-compose.yml",
+    ("src", "r-service/plumber.R"),
+    ("src", "r-service/entrypoint.R"),
+    ("src", "r-service/install.R"),
+    ("src", "r-service/Dockerfile"),
+    ("src", "backend/main.py"),
+    ("src", "backend/client.py"),
+    ("src", "backend/requirements.txt"),
+    ("src", "backend/Dockerfile"),
+    ("src", "frontend/Dockerfile"),
+    ("repo", "docker-compose.yml"),
+    ("repo", "Makefile"),
+    ("repo", ".env.example"),
 ]
 
 
-@pytest.mark.parametrize("rel_path", REQUIRED_FILES)
-def test_critical_files_exist(rel_path):
-    assert (ROOT / rel_path).exists(), f"Missing required file: {rel_path}"
+@pytest.mark.parametrize("base,rel_path", REQUIRED_FILES)
+def test_critical_files_exist(base, rel_path):
+    root = SRC if base == "src" else REPO_ROOT
+    assert (root / rel_path).exists(), f"Missing required file: {base}:/{rel_path}"
 
 
 # ---------------------------------------------------------------------------
@@ -41,8 +48,8 @@ def test_critical_files_exist(rel_path):
 # ---------------------------------------------------------------------------
 
 def test_dockerfile_port_matches_entrypoint():
-    dockerfile = (ROOT / "r-service" / "Dockerfile").read_text()
-    entrypoint = (ROOT / "r-service" / "entrypoint.R").read_text()
+    dockerfile = (SRC / "r-service" / "Dockerfile").read_text()
+    entrypoint = (SRC / "r-service" / "entrypoint.R").read_text()
 
     expose_match = re.search(r"EXPOSE\s+(\d+)", dockerfile)
     assert expose_match, "No EXPOSE directive found in r-service/Dockerfile"
@@ -82,7 +89,7 @@ EXPECTED_ROUTES = [
 
 @pytest.mark.parametrize("pattern", EXPECTED_ROUTES)
 def test_plumber_endpoints_defined(pattern):
-    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    plumber = (SRC / "r-service" / "plumber.R").read_text()
     assert re.search(pattern, plumber), (
         f"plumber.R is missing an endpoint matching: {pattern}"
     )
@@ -94,21 +101,21 @@ def test_soft_power_table_is_extracted():
     Without GetPowerTable() the only soft-power output is a PNG and no caller can pick a
     power programmatically -- which is the bug this endpoint exists to fix.
     """
-    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    plumber = (SRC / "r-service" / "plumber.R").read_text()
     assert "GetPowerTable(" in plumber
     assert "soft_power_table.csv" in plumber
 
 
 def test_gene_selection_uses_real_hdwgcna():
     """The sweep must call SetupForWGCNA/GetWGCNAGenes, never reimplement gene selection."""
-    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    plumber = (SRC / "r-service" / "plumber.R").read_text()
     assert "GetWGCNAGenes(" in plumber
     assert "gene_selection.csv" in plumber
 
 
 def test_gene_select_not_hardcoded():
     """gene_select/fraction must come from the request, not baked into SetupForWGCNA."""
-    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    plumber = (SRC / "r-service" / "plumber.R").read_text()
     assert "gene_select = p$gene_select" in plumber
     assert "fraction    = p$fraction" in plumber
 
@@ -118,7 +125,7 @@ def test_soft_power_never_infinite():
 
     recommend_power() must return NA instead, and /analyze must refuse a non-finite power.
     """
-    plumber = (ROOT / "r-service" / "plumber.R").read_text()
+    plumber = (SRC / "r-service" / "plumber.R").read_text()
     assert "recommend_power" in plumber
     assert "NA_integer_" in plumber
     assert "is.finite(sp)" in plumber
@@ -129,7 +136,7 @@ def test_soft_power_never_infinite():
 # ---------------------------------------------------------------------------
 
 def _compose() -> dict:
-    return yaml.safe_load((ROOT / "docker-compose.yml").read_text())
+    return yaml.safe_load((REPO_ROOT / "docker-compose.yml").read_text())
 
 
 def test_docker_compose_services_present():
@@ -179,7 +186,7 @@ def test_docker_compose_shared_mount_on_both_services():
 # ---------------------------------------------------------------------------
 
 def test_client_reads_r_service_url_env_var():
-    client_src = (ROOT / "backend" / "client.py").read_text()
+    client_src = (SRC / "backend" / "client.py").read_text()
     assert 'R_SERVICE_URL' in client_src, (
         "backend/client.py must read the R_SERVICE_URL environment variable"
     )
@@ -209,7 +216,7 @@ def test_docker_compose_sets_r_service_url():
 # 6. Python syntax
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("src", list((ROOT / "backend").glob("*.py")))
+@pytest.mark.parametrize("src", list((SRC / "backend").glob("*.py")))
 def test_python_syntax(src):
     try:
         py_compile.compile(str(src), doraise=True)
@@ -253,7 +260,7 @@ def test_analyze_soft_power_guard():
     The FastAPI route raises HTTPException(422) before forwarding to the R service
     when soft_power is absent. Verify the guard exists in the route handler source.
     """
-    main_src = (ROOT / "backend" / "main.py").read_text()
+    main_src = (SRC / "backend" / "main.py").read_text()
     # Guard: `if body.soft_power is None`
     assert "soft_power is None" in main_src, (
         "backend/main.py /analyze route must guard against missing soft_power"
