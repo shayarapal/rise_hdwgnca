@@ -34,18 +34,15 @@ frontend/.vite/
 *.mtx.gz
 local_data/
 
-# GSE243639 (~5.6 GB: 29 samples of raw 10x counts + built Seurat objects).
-# Download from GEO into $SHARED_DIR/DATA_UNZIPPED/; rebuild with build_seurat_GSE243639.R.
-# The build scripts themselves ARE tracked — everything else in here is not.
-DATA_UNZIPPED/*
-!DATA_UNZIPPED/*.R
+# Per-study data AND analysis scripts both live in $SHARED_DIR, outside this repo, and
+# were untracked here on 2026-09-07. GSE233866 (mouse SNc/VTA atlas) and GSE243639 (human)
+# are downloadable from GEO. Earlier revisions of the R scripts remain in git history:
+# git checkout 4e8e769 -- DATA_GSE233866/ DATA_UNZIPPED/
+# These rules are a safety net so a stray copy back into the repo stays ignored.
+DATA_UNZIPPED/
+DATA_GSE233866/
 GSE243639_Clinical_data.csv
 hdwgcna_out/
-
-# GSE233866 (mouse SNc/VTA atlas, ~9.9 GB raw counts + built Seurat objects).
-# Download from GEO into $SHARED_DIR/DATA_GSE233866/; rebuild with build_seurat_GSE233866.R.
-DATA_GSE233866/*
-!DATA_GSE233866/*.R
 
 # Analysis outputs moved to $SHARED_DIR/analysis_results/ on 2026-09-06 and untracked
 # since. Earlier revisions remain in git history (git checkout 446ce5f -- analysis_results/).

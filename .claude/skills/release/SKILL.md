@@ -19,9 +19,10 @@ git diff --cached --name-only -z | xargs -0 -I{} sh -c \
   '[ -f "{}" ] && [ $(stat -f%z "{}") -gt 52428800 ] && echo "TOO BIG: {}"'
 ```
 
-`.gitignore` already excludes `*.rds`, `*.tar`, `*.mtx`, `*.h5Seurat`, and `DATA_UNZIPPED/*`
-(with `!DATA_UNZIPPED/*.R` so the build scripts stay tracked). If a new data format appears,
-add it there rather than committing it.
+`.gitignore` already excludes `*.rds`, `*.tar`, `*.mtx`, `*.h5Seurat`, and the
+`DATA_UNZIPPED/`, `DATA_GSE233866/` and `analysis_results/` directories outright — as of
+2026-09-07 all three live in `$SHARED_DIR` outside the repo and nothing in them is tracked.
+If a new data format appears, add it there rather than committing it.
 
 ## 1. Decide the version
 
@@ -74,6 +75,7 @@ Confirm both pushes succeeded, then report the tag and the commit SHA.
 ## Do not
 
 - Force-push, amend, or rewrite history on `main`.
-- Commit anything from `DATA_UNZIPPED/` other than `*.R`.
+- Commit anything from `DATA_UNZIPPED/`, `DATA_GSE233866/` or `analysis_results/` — those
+  live outside the repo now and must stay untracked.
 - Tag a version that already exists (`git tag` to check first).
 - Invent changelog entries for work you did not verify actually happened — read the diff.

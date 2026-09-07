@@ -5,8 +5,8 @@
 # SHARED_DIR lives OUTSIDE this repository (see .env / .env.example) because the datasets
 # are 10-20 GB and must never enter git. It holds DATA_GSE233866/ and DATA_UNZIPPED/ with
 # those exact names, because the R scripts address data as /shared/DATA_GSE233866/...
+# Those directories carry the per-study analysis scripts too; neither is tracked here.
 # The ./local_data fallback preserves the old in-repo behaviour when SHARED_DIR is unset.
-# Run `make sync-scripts` to publish the tracked R scripts into SHARED_DIR.
 services:
   r-service:
     build: ./src/r-service
