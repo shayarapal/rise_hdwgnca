@@ -5,7 +5,7 @@
 # non-Docker dev flow, so the same folder works either way.
 services:
   r-service:
-    build: ./r-service
+    build: ./src/r-service
     ports:
       - "8100:8100"
     volumes:
@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    build: ./src/backend
     ports:
       - "8200:8200"
     volumes:
@@ -33,7 +33,7 @@ services:
   # Enable with: docker compose --profile frontend up
   # nginx inside the container listens on 80; exposed as 4000 on the host
   react-ui:
-    build: ./frontend
+    build: ./src/frontend
     ports:
       - "4000:80"
     profiles:

@@ -11,22 +11,22 @@ SHARED_DIR     ?= ./local_data
 # ── Local install (run once before using run-r / run-backend / run-ui) ────────
 install:
 	@echo ">>> Installing R packages (1-3 hours on first run)..."
-	Rscript r-service/install.R
+	Rscript src/r-service/install.R
 	@echo ">>> Installing Python packages..."
-	pip install -r backend/requirements.txt
+	pip install -r src/backend/requirements.txt
 	@echo ">>> Installing Node packages..."
-	npm install --prefix frontend
+	npm install --prefix src/frontend
 	@echo ">>> All dependencies installed."
 
 # ── Local service runners ──────────────────────────────────────────────────────
 run-r:
-	cd r-service && PORT=$(R_SERVICE_PORT) Rscript entrypoint.R
+	cd src/r-service && PORT=$(R_SERVICE_PORT) Rscript entrypoint.R
 
 run-backend:
-	cd backend && uvicorn main:app --reload --host 0.0.0.0 --port $(BACKEND_PORT)
+	cd src/backend && uvicorn main:app --reload --host 0.0.0.0 --port $(BACKEND_PORT)
 
 run-ui:
-	npm run dev --prefix frontend
+	npm run dev --prefix src/frontend
 
 # Run r-service + backend in parallel; Ctrl-C kills both
 dev:
@@ -46,23 +46,23 @@ docker-down:
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 install-tests:
-	pip install -r tests/requirements.txt
+	pip install -r src/tests/requirements.txt
 
 # Phase 1: static analysis — no running services needed
 test-phase1:
-	pytest tests/phase1/ -v
+	pytest src/tests/phase1/ -v
 
 # Phase 2: FastAPI layer with mocked R service — no running services needed
 test-phase2:
-	pytest tests/phase2/ -v
+	pytest src/tests/phase2/ -v
 
 # Phase 3: full stack integration — requires `make docker-up` to be running first
 test-phase3:
-	pytest tests/phase3/ -v
+	pytest src/tests/phase3/ -v
 
 # All offline phases (1 + 2) — safe to run anywhere
 test-all:
-	pytest tests/phase1/ tests/phase2/ -v
+	pytest src/tests/phase1/ src/tests/phase2/ -v
 
 # ── Local data directory (mirrors /shared volume) ─────────────────────────────
 setup-local:
