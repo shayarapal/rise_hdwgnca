@@ -4,6 +4,23 @@ A minimal `plumber`-based R microservice that exposes the [hdWGCNA](https://gith
 single-cell co-expression pipeline over HTTP, so it can be called from a Python
 backend exactly the way you'd call a native Python library.
 
+## Contents
+
+- [Why this exists](#why-this-exists)
+- [Scope](#scope)
+- [Endpoints](#endpoints)
+- [Typical workflow](#typical-workflow)
+- [Choosing the soft power](#choosing-the-soft-power)
+- [Choosing the gene fraction](#choosing-the-gene-fraction)
+- [Request body](#request-body)
+- [Comparing two conditions](#comparing-two-conditions)
+- [Requirements](#requirements)
+- [Running](#running)
+- [What this is not](#what-this-is-not)
+- [Use of AI assistance](#use-of-ai-assistance)
+- [Repo layout](#repo-layout)
+- [Code and data availability](#code-and-data-availability)
+
 ## Why this exists
 
 [PyWGCNA](https://github.com/mortazavilab/PyWGCNA) gives bulk RNA-seq WGCNA users a
@@ -268,8 +285,9 @@ Put simply: AI helped build the instrument; the measurements are the instrument'
 
 ## Repo layout
 
-Everything except the analysis outputs lives under `src/`. The analysis outputs themselves
-live outside the repository, alongside the datasets — see "Where the data lives" below.
+The bridge service lives under `src/`; the per-study analysis scripts live under
+`analysis/`. The analysis *outputs* live outside the repository, alongside the datasets —
+see "Where the data lives" below.
 
 ```
 src/
@@ -294,6 +312,11 @@ src/
     PROMPT_TEMPLATE.md            # reusable template for future work requests
     HDWGCNA_SYSTEM_CHECK_PROMPT.md
 
+analysis/             # per-study R scripts that produced the published results
+  mouse_GSE233866/    # 19 scripts: Seurat build, networks, DME, preservation
+  human_GSE243639/    # 6 scripts: Seurat build, PD/control networks, DME
+  README.md           # run order and how to invoke them
+
 reminders/            # working notes
 
 docker-compose.yml    # service topology (build contexts point into src/)
@@ -302,16 +325,16 @@ Makefile              # local dev shortcuts
 CLAUDE.md             # AI pair-programming context and guardrails
 ```
 
-### Where the data and the analysis scripts live
+### Where the data lives
 
-**This repository is the hdWGCNA HTTP bridge only.** The datasets *and* the per-study R
-analysis scripts both live **outside** it, in the directory named by `SHARED_DIR` (see
-`.env.example`), which is bind-mounted at `/shared` in both containers:
+The **datasets** live outside this repository, in the directory named by `SHARED_DIR` (see
+`.env.example`), which is bind-mounted at `/shared` in both containers. The **analysis
+scripts** are tracked here, in `analysis/` — see `analysis/README.md`.
 
 ```
 $SHARED_DIR/                     # e.g. C:/projects/rise_hdwgnca_data — NOT in the repo
-  DATA_GSE233866/                # mouse: counts, built Seurat objects, run outputs, *.R
-  DATA_UNZIPPED/                 # human: GSE243639_RAW.tar, counts, SEURAT_INPUT/, *.R
+  DATA_GSE233866/                # mouse: counts, built Seurat objects, run outputs, synced *.R
+  DATA_UNZIPPED/                 # human: GSE243639_RAW.tar, counts, SEURAT_INPUT/, synced *.R
   analysis_results/              # pipeline outputs: modules, kME, DME, enrichment, figures
   results/                       # earlier exploratory runs
 ```
@@ -321,10 +344,10 @@ $SHARED_DIR/                     # e.g. C:/projects/rise_hdwgnca_data — NOT in
 2026-09-06 and is no longer tracked; earlier revisions remain in git history
 (`git checkout 446ce5f -- analysis_results/`). No code reads it — it is output only.
 
-The 24 R scripts that produced the published analysis (Seurat build, network construction,
-DME, module preservation, diagnostics) sit next to the data they read, in those same two
-subdirectories. They were untracked here on 2026-09-07; earlier revisions remain in git
-history: `git checkout 4e8e769 -- DATA_GSE233866/ DATA_UNZIPPED/`.
+The 25 R scripts that produced the published analysis (Seurat build, network construction,
+DME, module preservation, diagnostics) are tracked in `analysis/`. The container sees only
+`SHARED_DIR`, so `make sync-analysis` copies them into the two subdirectories above before a
+run. The copy in `analysis/` is canonical; the sync is one-way.
 
 Those two subdirectory names are **load-bearing**: the scripts address data by absolute
 container path, e.g. `/shared/DATA_GSE233866/seurat_GSE233866_SNc_VTA.rds`. Renaming them
@@ -336,7 +359,7 @@ To set this up from a fresh clone:
 cp .env.example .env          # then edit SHARED_DIR to a path outside the repo
 make setup-local              # creates the subdirectory skeleton
 # download raw counts from GEO: GSE233866 (mouse), GSE243639 (human)
-# place the analysis .R scripts in the matching subdirectories
+make sync-analysis            # copies analysis/*.R into the matching subdirs
 ```
 
 ## Code and data availability
@@ -359,9 +382,9 @@ Neither dataset was produced by this project, and neither is redistributed here 
 The bridge service in this repository is released under GPL-3.0-or-later (see `LICENSE`),
 matching the license of hdWGCNA, which it loads in-process.
 
-The per-study R analysis scripts that produced the published results are **not** tracked in
-this repository. They live alongside the data in `$SHARED_DIR`, and earlier revisions remain
-in git history at `git checkout 4e8e769 -- DATA_GSE233866/ DATA_UNZIPPED/`.
+The 25 per-study R analysis scripts that produced the published results are tracked in
+`analysis/`, split by study (`mouse_GSE233866/`, `human_GSE243639/`). `analysis/README.md`
+gives the run order for each.
 
 ### Environment used for the published analysis
 

@@ -6,7 +6,7 @@ BACKEND_PORT   ?= 8200
 SHARED_DIR     ?= C:/projects/rise_hdwgnca_data
 
 .PHONY: install run-r run-backend run-ui dev docker-up docker-down setup-local \
-        install-tests test-phase1 test-phase2 test-phase3 test-all
+        install-tests test-phase1 test-phase2 test-phase3 test-all sync-analysis
 
 # ── Local install (run once before using run-r / run-backend / run-ui) ────────
 install:
@@ -73,3 +73,12 @@ setup-local:
 	mkdir -p $(SHARED_DIR)/DATA_GSE233866 $(SHARED_DIR)/DATA_UNZIPPED $(SHARED_DIR)/results
 	@echo "SHARED_DIR = $(SHARED_DIR)"
 	@echo "Download raw counts from GEO (GSE233866, GSE243639) into the matching subdirs."
+
+# ── Analysis scripts ─────────────────────────────────────────────────────────
+# analysis/ holds the per-study R scripts that produced the published results. The
+# container sees only SHARED_DIR, so the scripts have to be copied there to run.
+# One-way on purpose: analysis/ is canonical, edit there and sync out.
+sync-analysis:
+	cp analysis/mouse_GSE233866/*.R $(SHARED_DIR)/DATA_GSE233866/
+	cp analysis/human_GSE243639/*.R $(SHARED_DIR)/DATA_UNZIPPED/
+	@echo "Synced analysis/ -> $(SHARED_DIR)/DATA_{GSE233866,UNZIPPED}/"
