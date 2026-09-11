@@ -42,10 +42,12 @@ install.packages(c(
 cat("==> Installing SeuratDisk (LoadH5Seurat)...\n")
 # NOTE: SeuratDisk is unmaintained since 2022. If your .h5Seurat files were
 # written by Seurat v5, switch to readRDS() + .rds format instead.
-remotes::install_github("mojaveazure/seurat-disk")
+remotes::install_github("mojaveazure/seurat-disk", ref = "877d4e18ab38c686f5db54f8cd290274ccdbe295")
 
-cat("==> Installing hdWGCNA (dev branch)...\n")
-remotes::install_github("smorabit/hdWGCNA", ref = "dev")
+cat("==> Installing hdWGCNA (pinned commit)...\n")
+# v0.4.12, 2026-07-29. Do not float back to ref = "dev" -- module assignments are
+# version-sensitive and the paper's numbers came from this commit.
+remotes::install_github("smorabit/hdWGCNA", ref = "e3344d1f7bbac4264adf94f7aa31e0802fa8282d")
 
 # Fail loudly if the core stack did not actually install (remotes only warns on missing deps).
 cat("==> Verifying core stack loads...\n")

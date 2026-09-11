@@ -338,3 +338,51 @@ make setup-local              # creates the subdirectory skeleton
 # download raw counts from GEO: GSE233866 (mouse), GSE243639 (human)
 # place the analysis .R scripts in the matching subdirectories
 ```
+
+## Code and data availability
+
+### Data
+
+This project generated no new data. All analyses use publicly available datasets
+downloaded from the NCBI Gene Expression Omnibus:
+
+| Accession | Organism | Content |
+|---|---|---|
+| `GEO: GSE233866` | Mouse | SNc/VTA dopaminergic atlas; untreated baseline and 6-OHDA lesion/intact counts |
+| `GEO: GSE243639` | Human | SNc dopaminergic neurons, PD and control donors |
+
+Neither dataset was produced by this project, and neither is redistributed here — see
+"Where the data and the analysis scripts live" above for the expected local layout.
+
+### Code
+
+The bridge service in this repository is released under GPL-3.0-or-later (see `LICENSE`),
+matching the license of hdWGCNA, which it loads in-process.
+
+The per-study R analysis scripts that produced the published results are **not** tracked in
+this repository. They live alongside the data in `$SHARED_DIR`, and earlier revisions remain
+in git history at `git checkout 4e8e769 -- DATA_GSE233866/ DATA_UNZIPPED/`.
+
+### Environment used for the published analysis
+
+Results were produced with the `r-service` image built 2026-07-29. The GitHub dependencies are
+pinned to the exact commits in that image, so rebuilding reproduces the same stack:
+
+| Component | Version | Pin |
+|---|---|---|
+| R | 4.4.3 | `rocker/r-ver:4.4.3` |
+| hdWGCNA | 0.4.12 | `e3344d1f7bbac4264adf94f7aa31e0802fa8282d` |
+| WGCNA | 1.74 | CRAN (RSPM snapshot fixed by the base image) |
+| Seurat | 5.5.1 | CRAN (as above) |
+| SeuratObject | 5.4.0 | CRAN (as above) |
+| SeuratDisk | 0.0.0.9021 | `877d4e18ab38c686f5db54f8cd290274ccdbe295` |
+| igraph | 2.3.3 | CRAN (as above) |
+| enrichR | 3.4 | CRAN (as above) |
+| ggforestplot | 0.1.0 | `547617e63fa481a5f28ffc56c07d46be4af688b2` |
+
+Do not float `hdWGCNA` back to `ref='dev'`. Module assignments are version-sensitive, and the
+published numbers came from the pinned commit.
+
+Note that `src/r-service/install.R` (the non-Docker path) installs CRAN packages from
+`cloud.r-project.org` and therefore resolves to current versions rather than the snapshot
+above. Use the Docker path to reproduce the published environment.

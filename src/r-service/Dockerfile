@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.4
+FROM rocker/r-ver:4.4.3
 
 # System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -50,10 +50,12 @@ RUN Rscript -e "install.packages('WGCNA', repos='https://cloud.r-project.org')"
 # readRDS() + .rds format and remove this dependency.
 RUN Rscript -e "\
   install.packages('Seurat', repos='https://cloud.r-project.org'); \
-  remotes::install_github('mojaveazure/seurat-disk')"
+  remotes::install_github('mojaveazure/seurat-disk', ref='877d4e18ab38c686f5db54f8cd290274ccdbe295')"
 
-# hdWGCNA from GitHub dev branch
-RUN Rscript -e "remotes::install_github('smorabit/hdWGCNA', ref='dev')"
+# hdWGCNA pinned to the dev-branch commit that produced the published analysis
+# (v0.4.12, 2026-07-29). Do not float this back to ref='dev': module assignments
+# are version-sensitive and the paper's numbers came from this commit.
+RUN Rscript -e "remotes::install_github('smorabit/hdWGCNA', ref='e3344d1f7bbac4264adf94f7aa31e0802fa8282d')"
 
 # harmony -- used by the DATA_*/build_seurat_*.R scripts for animal/donor batch
 # correction before saving a Seurat object (not called by the bridge itself).
@@ -63,7 +65,7 @@ RUN Rscript -e "install.packages(c('harmony', 'R.utils'), repos='https://cloud.r
 # ggforestplot -- hdWGCNA's PlotDMEsLollipop loads this at call time and, if
 # missing, tries to auto-install it itself (which fails without devtools and
 # crashes the caller). Install it ahead of time instead.
-RUN Rscript -e "remotes::install_github('NightingaleHealth/ggforestplot')"
+RUN Rscript -e "remotes::install_github('NightingaleHealth/ggforestplot', ref='547617e63fa481a5f28ffc56c07d46be4af688b2')"
 
 # Build-time tripwire: install.packages() and remotes::install_github() only WARN on a failed
 # package and let the build exit 0 — so any missing runtime dependency ships silently and the

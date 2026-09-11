@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+title: "hdWGCNA Bridge"
+message: "If you use this software, please cite it using these metadata."
+type: software
+authors:
+  - alias: shayarapal
+    email: shayarapal2000@gmail.com
+    # Set given-names and family-names before archiving for the paper: Zenodo
+    # builds the DOI's author record from these fields, and an alias alone
+    # produces a citation with no human-readable author.
+repository-code: "https://github.com/shayarapal/rise_hdwgnca"
+abstract: >-
+  A plumber-based R microservice that exposes the hdWGCNA single-cell
+  co-expression pipeline over HTTP, so it can be driven from a Python
+  backend. The service is a thin wrapper: hdWGCNA and Seurat functions are
+  called as documented upstream, with no part of the algorithm
+  reimplemented, approximated, or ported to Python.
+keywords:
+  - hdWGCNA
+  - WGCNA
+  - gene co-expression network analysis
+  - single-cell transcriptomics
+  - Seurat
+  - plumber
+license: GPL-3.0-or-later
+version: 0.4.0
+date-released: "2026-09-10"
